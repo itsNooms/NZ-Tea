@@ -34,35 +34,41 @@ const Dashboard = ({ isMobileOpen, setIsMobileOpen }) => {
   const fetchDashboardData = async () => {
     setLoading(true);
     
-    // Fetch financial stats from balance sheets
+    // 1. Fetch total earnings from customer bills
+    const { data: customerData, error: customerError } = await supabase
+      .from('customers')
+      .select('total_amount, amount_paid');
+
+    const totalEarned = (customerData || []).reduce((acc, c) => acc + (c.total_amount || 0), 0);
+    const totalCollected = (customerData || []).reduce((acc, c) => acc + (c.amount_paid || 0), 0);
+
+    // 2. Fetch financial stats from balance sheets
     const { data: sheets, error: sheetError } = await supabase
       .from('balance_sheets')
       .select('*');
 
     if (!sheetError && sheets) {
       const totalInvested = sheets.reduce((acc, s) => acc + (s.invested || 0), 0);
-      const totalEarned = sheets.reduce((acc, s) => acc + (s.sales || 0), 0);
-      const totalProfit = sheets.reduce((acc, s) => acc + (s.profit || 0), 0);
+      const totalExpenses = sheets.reduce((acc, s) => acc + (s.expenses || 0), 0);
+      
+      // Real Profit = Total Earned (Bills) - Total Expenses (Operations) - Total Invested (Capital)
+      const rawProfit = totalEarned - totalExpenses - totalInvested;
       
       setStats({
         invested: totalInvested,
         earned: totalEarned,
-        profit: totalProfit > 0 ? totalProfit : 0,
-        loss: totalProfit < 0 ? Math.abs(totalProfit) : 0
+        collected: totalCollected,
+        profit: rawProfit > 0 ? rawProfit : 0,
+        loss: rawProfit < 0 ? Math.abs(rawProfit) : 0
       });
       setTempAmount(totalInvested);
-    }
 
-    // Use real data for the chart if sheets exist
-    if (!sheetError && sheets) {
+      // 3. Populate chart data from monthly sales recorded in balance sheets
       const chartData = sheets.map(s => ({
         day: s.month,
         revenue: s.sales || 0
       }));
       setDailySales(chartData);
-    } else {
-      // Fallback/Loading state for sales
-      setDailySales([]);
     }
 
     setLoading(false);
@@ -84,9 +90,10 @@ const Dashboard = ({ isMobileOpen, setIsMobileOpen }) => {
       icon: IndianRupee,
       editable: true 
     },
-    { title: 'Net Earned', value: formatCurrency(stats.earned), trend: '+0%', isPositive: true, icon: TrendingUp },
-    { title: 'Profit', value: formatCurrency(stats.profit), trend: '+0%', isPositive: true, icon: Award },
-    { title: 'Loss', value: formatCurrency(stats.loss), trend: '0%', isPositive: false, icon: TrendingDown },
+    { title: 'Total Revenue (Billed)', value: formatCurrency(stats.earned), trend: '+0%', isPositive: true, icon: TrendingUp },
+    { title: 'Cash Collected', value: formatCurrency(stats.collected || 0), trend: '+0%', isPositive: true, icon: IndianRupee },
+    { title: 'Net Profit', value: formatCurrency(stats.profit), trend: '+0%', isPositive: true, icon: Award },
+    { title: 'Net Loss', value: formatCurrency(stats.loss), trend: '0%', isPositive: false, icon: TrendingDown },
   ];
 
   return (
