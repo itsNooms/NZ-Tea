@@ -75,22 +75,43 @@ const Dashboard = ({ isMobileOpen, setIsMobileOpen }) => {
   };
 
   const handleSaveInvested = async () => {
-    // Current logic: We'll update the investment for the month currently selected in the month picker.
-    // In a production-ready app, you'd likely have a separate 'capital' table, 
-    // but building on top of your existing 'balance_sheets' structure:
-    const monthKey = selectedMonth.split(' ')[0].substring(0, 3) + ' 2026';
+    // Standardize month key to exactly 3 letters + year (e.g., 'Apr 2026')
+    const monthPart = selectedMonth.split(' ')[0].substring(0, 3);
+    const yearPart = selectedMonth.split(' ')[1];
+    const monthKey = `${monthPart} ${yearPart}`;
     
     setLoading(true);
-    const { error } = await supabase
+    
+    // First, check if the row exists
+    const { data: sheets } = await supabase
       .from('balance_sheets')
-      .update({ invested: tempAmount })
+      .select('id')
       .eq('month', monthKey);
 
+    const existingRow = sheets && sheets.length > 0 ? sheets[0] : null;
+
+    let error;
+    if (existingRow) {
+      // Update existing
+      const { error: updateError } = await supabase
+        .from('balance_sheets')
+        .update({ invested: tempAmount })
+        .eq('id', existingRow.id);
+      error = updateError;
+    } else {
+      // Insert new if missing
+      const { error: insertError } = await supabase
+        .from('balance_sheets')
+        .insert([{ month: monthKey, invested: tempAmount, opening: 0, sales: 0, expenses: 0, profit: 0, closing: 0 }]);
+      error = insertError;
+    }
+
     if (error) {
+      console.error('Persistence error:', error);
       alert('Error updating investment: ' + error.message);
     } else {
       setIsEditingInvested(false);
-      fetchDashboardData(); // Refresh all totals from DB
+      await fetchDashboardData(); 
     }
   };
 
