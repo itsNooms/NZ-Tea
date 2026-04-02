@@ -75,10 +75,23 @@ const Dashboard = ({ isMobileOpen, setIsMobileOpen }) => {
   };
 
   const handleSaveInvested = async () => {
-    // In a real app, this might update a 'capital' table or the latest month's balance sheet.
-    // For now, we'll just update the local state to demonstrate reactivity.
-    setStats({ ...stats, invested: tempAmount, profit: stats.earned - tempAmount });
-    setIsEditingInvested(false);
+    // Current logic: We'll update the investment for the month currently selected in the month picker.
+    // In a production-ready app, you'd likely have a separate 'capital' table, 
+    // but building on top of your existing 'balance_sheets' structure:
+    const monthKey = selectedMonth.split(' ')[0].substring(0, 3) + ' 2026';
+    
+    setLoading(true);
+    const { error } = await supabase
+      .from('balance_sheets')
+      .update({ invested: tempAmount })
+      .eq('month', monthKey);
+
+    if (error) {
+      alert('Error updating investment: ' + error.message);
+    } else {
+      setIsEditingInvested(false);
+      fetchDashboardData(); // Refresh all totals from DB
+    }
   };
 
   const kpis = [
