@@ -53,11 +53,17 @@ const Dashboard = ({ isMobileOpen, setIsMobileOpen }) => {
       setTempAmount(totalInvested);
     }
 
-    // Mocking daily sales for the chart if empty
-    setDailySales(Array.from({ length: 30 }, (_, i) => ({ 
-      day: (i + 1).toString().padStart(2, '0'), 
-      revenue: Math.floor(Math.random() * 5000) 
-    })));
+    // Use real data for the chart if sheets exist
+    if (!sheetError && sheets) {
+      const chartData = sheets.map(s => ({
+        day: s.month,
+        revenue: s.sales || 0
+      }));
+      setDailySales(chartData);
+    } else {
+      // Fallback/Loading state for sales
+      setDailySales([]);
+    }
 
     setLoading(false);
   };
@@ -161,7 +167,7 @@ const Dashboard = ({ isMobileOpen, setIsMobileOpen }) => {
 
           <div className="card chart-container" style={{ marginBottom: '2rem' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-              <h3>Daily Sales Revenue</h3>
+              <h3>Monthly Sales Revenue</h3>
               <span style={{ fontSize: '0.875rem', color: 'var(--text-muted)' }}>{selectedMonth}</span>
             </div>
             <ResponsiveContainer width="100%" height="85%">
