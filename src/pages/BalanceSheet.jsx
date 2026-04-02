@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react';
 import Header from '../components/Header';
 import { Download, Filter, TrendingUp, TrendingDown, IndianRupee, Edit2, Check, X } from 'lucide-react';
 import { formatCurrency } from '../utils/formatters';
