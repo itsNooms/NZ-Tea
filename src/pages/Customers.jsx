@@ -150,74 +150,136 @@ const Customers = ({ setIsMobileOpen }) => {
       </div>
 
       <div className="card" style={{ padding: '0', overflow: 'hidden' }}>
-        <div style={{ overflowX: 'auto' }}>
-          {loading ? (
-            <div style={{ textAlign: 'center', padding: '4rem' }}>Loading Customers...</div>
-          ) : (
-            <table>
-              <thead>
-                <tr>
-                  <th>Customer Name</th>
-                  <th>Total Order</th>
-                  <th>Pending Balance</th>
-                  <th>Status</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredCustomers.length > 0 ? filteredCustomers.map((customer) => (
-                  <tr key={customer.id}>
-                    <td>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                        <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'var(--primary-light)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)', fontWeight: 600, fontSize: '0.75rem' }}>
-                          {customer.name?.charAt(0)}
-                        </div>
-                        <div style={{ fontWeight: 600 }}>{customer.name}</div>
-                      </div>
-                    </td>
-                    <td style={{ fontWeight: 600 }}>{formatCurrency(customer.total_amount)}</td>
-                    <td style={{ color: customer.pending_balance > 0 ? 'var(--danger)' : 'inherit', fontWeight: 600 }}>
-                      {customer.pending_balance > 0 ? formatCurrency(customer.pending_balance) : 'Settled'}
-                    </td>
-                    <td>
-                      <select 
-                        value={customer.status}
-                        onChange={(e) => handleStatusChange(customer, e.target.value)}
-                        style={{ 
-                          padding: '4px 8px', 
-                          borderRadius: '6px', 
-                          border: '1px solid rgba(0,0,0,0.1)',
-                          fontSize: '0.8125rem',
-                          fontWeight: 600,
-                          background: 'transparent',
-                          cursor: 'pointer',
-                          color: customer.status === 'Paid' ? 'var(--success)' : (customer.status === 'Partial' ? 'var(--warning)' : 'var(--text-muted)')
-                        }}
-                      >
-                        <option value="Paid">Paid</option>
-                        <option value="Pending">Pending</option>
-                        <option value="Partial">Partial</option>
-                      </select>
-                    </td>
-                    <td>
-                      <div style={{ display: 'flex', gap: '0.5rem' }}>
-                        <button className="btn-icon" onClick={() => handleDeleteCustomer(customer.id)}>
-                          <Trash2 size={18} color="var(--danger)" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                )) : (
+        {loading ? (
+          <div style={{ textAlign: 'center', padding: '4rem' }}>Loading Customers...</div>
+        ) : (
+          <>
+            <div className="desktop-only" style={{ overflowX: 'auto' }}>
+              <table>
+                <thead>
                   <tr>
-                    <td colSpan="5" style={{ textAlign: 'center', padding: '4rem', color: 'var(--text-muted)' }}>
-                      No customers found. Register your first customer above!
-                    </td>
+                    <th>Customer Name</th>
+                    <th>Total Order</th>
+                    <th>Pending Balance</th>
+                    <th>Status</th>
+                    <th>Actions</th>
                   </tr>
-                )}
-              </tbody>
-            </table>
-          )}
-        </div>
+                </thead>
+                <tbody>
+                  {filteredCustomers.length > 0 ? filteredCustomers.map((customer) => (
+                    <tr key={customer.id}>
+                      <td>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                          <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'var(--primary-light)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)', fontWeight: 600, fontSize: '0.75rem' }}>
+                            {customer.name?.charAt(0)}
+                          </div>
+                          <div style={{ fontWeight: 600 }}>{customer.name}</div>
+                        </div>
+                      </td>
+                      <td style={{ fontWeight: 600 }}>{formatCurrency(customer.total_amount)}</td>
+                      <td style={{ color: customer.pending_balance > 0 ? 'var(--danger)' : 'inherit', fontWeight: 600 }}>
+                        {customer.pending_balance > 0 ? formatCurrency(customer.pending_balance) : 'Settled'}
+                      </td>
+                      <td>
+                        <select 
+                          value={customer.status}
+                          onChange={(e) => handleStatusChange(customer, e.target.value)}
+                          style={{ 
+                            padding: '4px 8px', 
+                            borderRadius: '6px', 
+                            border: '1px solid rgba(0,0,0,0.1)',
+                            fontSize: '0.8125rem',
+                            fontWeight: 600,
+                            background: 'transparent',
+                            cursor: 'pointer',
+                            color: customer.status === 'Paid' ? 'var(--success)' : (customer.status === 'Partial' ? 'var(--warning)' : 'var(--text-muted)')
+                          }}
+                        >
+                          <option value="Paid">Paid</option>
+                          <option value="Pending">Pending</option>
+                          <option value="Partial">Partial</option>
+                        </select>
+                      </td>
+                      <td>
+                        <div style={{ display: 'flex', gap: '0.5rem' }}>
+                          <button className="btn-icon" onClick={() => handleDeleteCustomer(customer.id)}>
+                            <Trash2 size={18} color="var(--danger)" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  )) : (
+                    <tr>
+                      <td colSpan="5" style={{ textAlign: 'center', padding: '4rem', color: 'var(--text-muted)' }}>
+                        No customers found. Register your first customer above!
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            <div className="mobile-only mobile-grid">
+              {filteredCustomers.length > 0 ? filteredCustomers.map((customer) => (
+                <div key={customer.id} className="mobile-card">
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', borderBottom: '1px solid rgba(0,0,0,0.05)', paddingBottom: '1rem', marginBottom: '0.5rem' }}>
+                    <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'var(--primary-light)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)', fontWeight: 600, fontSize: '1rem' }}>
+                      {customer.name?.charAt(0)}
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontWeight: 700, fontSize: '1.1rem', color: 'var(--primary)' }}>{customer.name}</div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '4px' }}>
+                        {getStatusIcon(customer.status)}
+                        <span style={{ fontSize: '0.8125rem', fontWeight: 600, color: 'var(--text-muted)' }}>{customer.status}</span>
+                      </div>
+                    </div>
+                    <button className="btn-icon" onClick={() => handleDeleteCustomer(customer.id)}>
+                      <Trash2 size={18} color="var(--danger)" />
+                    </button>
+                  </div>
+
+                  <div className="mobile-card-row">
+                    <span className="mobile-label">Total Bills</span>
+                    <span className="mobile-value">{formatCurrency(customer.total_amount)}</span>
+                  </div>
+                  
+                  <div className="mobile-card-row">
+                    <span className="mobile-label">Pending</span>
+                    <span className="mobile-value" style={{ color: customer.pending_balance > 0 ? 'var(--danger)' : 'var(--success)' }}>
+                      {customer.pending_balance > 0 ? formatCurrency(customer.pending_balance) : 'Settled'}
+                    </span>
+                  </div>
+
+                  <div style={{ marginTop: '1rem' }}>
+                    <label className="mobile-label" style={{ display: 'block', marginBottom: '0.5rem' }}>Update Payment Status</label>
+                    <select 
+                      value={customer.status}
+                      onChange={(e) => handleStatusChange(customer, e.target.value)}
+                      className="btn btn-outline"
+                      style={{ 
+                        width: '100%',
+                        padding: '0.75rem', 
+                        borderRadius: '10px',
+                        fontSize: '0.875rem',
+                        fontWeight: 600,
+                        background: 'rgba(0,0,0,0.02)',
+                        border: '1px solid rgba(0,0,0,0.08)'
+                      }}
+                    >
+                      <option value="Paid">Mark as Paid Fully</option>
+                      <option value="Pending">Mark as Fully Pending</option>
+                      <option value="Partial">Mark as Partially Paid</option>
+                    </select>
+                  </div>
+                </div>
+              )) : (
+                <div style={{ textAlign: 'center', padding: '4rem', color: 'var(--text-muted)' }}>
+                  No customers found. Register your first customer above!
+                </div>
+              )}
+            </div>
+          </>
+        )}
       </div>
 
       {showAddModal && (

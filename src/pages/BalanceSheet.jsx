@@ -109,28 +109,86 @@ const BalanceSheet = ({ setIsMobileOpen }) => {
       </div>
 
       <div className="card" style={{ padding: '0', overflow: 'hidden' }}>
-        <div style={{ overflowX: 'auto' }}>
-          {loading ? (
-            <div style={{ textAlign: 'center', padding: '4rem' }}>Loading Balance Sheet...</div>
-          ) : (
-            <table>
-              <thead>
-                <tr>
-                  <th>Month</th>
-                  <th>Opening Bal</th>
-                  <th>Invested (Editable)</th>
-                  <th>Total Sales</th>
-                  <th>Expenses</th>
-                  <th>Net Profit/Loss</th>
-                  <th>Closing Bal</th>
-                </tr>
-              </thead>
-              <tbody>
-                {data.length > 0 ? data.map((row, idx) => (
-                  <tr key={row.id}>
-                    <td style={{ fontWeight: 600 }}>{row.month}</td>
-                    <td>{formatCurrency(row.opening)}</td>
-                    <td style={{ cursor: 'pointer' }}>
+        {loading ? (
+          <div style={{ textAlign: 'center', padding: '4rem' }}>Loading Balance Sheet...</div>
+        ) : (
+          <>
+            <div className="desktop-only" style={{ overflowX: 'auto' }}>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Month</th>
+                    <th>Opening Bal</th>
+                    <th>Invested (Editable)</th>
+                    <th>Total Sales</th>
+                    <th>Expenses</th>
+                    <th>Net Profit/Loss</th>
+                    <th>Closing Bal</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {data.length > 0 ? data.map((row, idx) => (
+                    <tr key={row.id}>
+                      <td style={{ fontWeight: 600 }}>{row.month}</td>
+                      <td>{formatCurrency(row.opening)}</td>
+                      <td style={{ cursor: 'pointer' }}>
+                        {editingIndex === idx ? (
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                            <input 
+                              type="number"
+                              value={tempValue}
+                              onChange={(e) => setTempValue(e.target.value)}
+                              autoFocus
+                              style={{ width: '80px', padding: '4px', borderRadius: '4px', border: '1px solid var(--primary)' }}
+                            />
+                            <button onClick={() => handleSave(idx)} style={{ color: 'var(--success)', background: 'none', border: 'none', cursor: 'pointer' }}>
+                              <Check size={16} />
+                            </button>
+                            <button onClick={() => setEditingIndex(null)} style={{ color: 'var(--danger)', background: 'none', border: 'none', cursor: 'pointer' }}>
+                              <X size={16} />
+                            </button>
+                          </div>
+                        ) : (
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }} onClick={() => handleEdit(idx, row.invested)}>
+                            {formatCurrency(row.invested)}
+                            <Edit2 size={12} style={{ opacity: 0.3 }} />
+                          </div>
+                        )}
+                      </td>
+                      <td>{formatCurrency(row.sales)}</td>
+                      <td>{formatCurrency(row.expenses)}</td>
+                      <td style={{ color: row.profit > 0 ? 'var(--success)' : 'var(--danger)', fontWeight: 700 }}>
+                        {row.profit > 0 ? '+' : ''}{formatCurrency(row.profit)}
+                      </td>
+                      <td style={{ fontWeight: 600 }}>{formatCurrency(row.closing)}</td>
+                    </tr>
+                  )) : (
+                    <tr>
+                      <td colSpan="7" style={{ textAlign: 'center', padding: '4rem', color: 'var(--text-muted)' }}>
+                        No financial data found in Supabase.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            <div className="mobile-only mobile-grid">
+              {data.length > 0 ? data.map((row, idx) => (
+                <div key={row.id} className="mobile-card">
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(0,0,0,0.05)', paddingBottom: '0.75rem' }}>
+                    <div style={{ fontWeight: 700, fontSize: '1.1rem', color: 'var(--primary)' }}>{row.month} 2026</div>
+                    <div style={{ fontSize: '0.8125rem', fontWeight: 600, padding: '4px 8px', background: 'var(--bg-warm)', borderRadius: '6px' }}>Financial Record</div>
+                  </div>
+
+                  <div className="mobile-card-row">
+                    <span className="mobile-label">Opening Balance</span>
+                    <span className="mobile-value">{formatCurrency(row.opening)}</span>
+                  </div>
+
+                  <div className="mobile-card-row">
+                    <span className="mobile-label">Invested</span>
+                    <div className="mobile-value">
                       {editingIndex === idx ? (
                         <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                           <input 
@@ -153,25 +211,39 @@ const BalanceSheet = ({ setIsMobileOpen }) => {
                           <Edit2 size={12} style={{ opacity: 0.3 }} />
                         </div>
                       )}
-                    </td>
-                    <td>{formatCurrency(row.sales)}</td>
-                    <td>{formatCurrency(row.expenses)}</td>
-                    <td style={{ color: row.profit > 0 ? 'var(--success)' : 'var(--danger)', fontWeight: 700 }}>
+                    </div>
+                  </div>
+
+                  <div className="mobile-card-row">
+                    <span className="mobile-label">Total Sales</span>
+                    <span className="mobile-value">{formatCurrency(row.sales)}</span>
+                  </div>
+
+                  <div className="mobile-card-row">
+                    <span className="mobile-label">Expenses</span>
+                    <span className="mobile-value">{formatCurrency(row.expenses)}</span>
+                  </div>
+
+                  <div className="mobile-card-row">
+                    <span className="mobile-label">Net Profit</span>
+                    <span className="mobile-value" style={{ color: row.profit > 0 ? 'var(--success)' : 'var(--danger)', fontSize: '1rem' }}>
                       {row.profit > 0 ? '+' : ''}{formatCurrency(row.profit)}
-                    </td>
-                    <td style={{ fontWeight: 600 }}>{formatCurrency(row.closing)}</td>
-                  </tr>
-                )) : (
-                  <tr>
-                    <td colSpan="7" style={{ textAlign: 'center', padding: '4rem', color: 'var(--text-muted)' }}>
-                      No financial data found in Supabase.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          )}
-        </div>
+                    </span>
+                  </div>
+
+                  <div className="mobile-card-row" style={{ background: 'var(--bg-warm)', margin: '0 -1.25rem -1.25rem -1.25rem', padding: '1rem 1.25rem', borderBottomLeftRadius: '12px', borderBottomRightRadius: '12px' }}>
+                    <span className="mobile-label" style={{ color: 'var(--primary)', fontWeight: 700 }}>Closing Balance</span>
+                    <span className="mobile-value" style={{ color: 'var(--primary)', fontSize: '1.1rem', fontWeight: 700 }}>{formatCurrency(row.closing)}</span>
+                  </div>
+                </div>
+              )) : (
+                <div style={{ textAlign: 'center', padding: '4rem', color: 'var(--text-muted)' }}>
+                  No financial data found in Supabase.
+                </div>
+              )}
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
