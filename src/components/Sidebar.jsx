@@ -31,7 +31,7 @@ const Sidebar = ({ isCollapsed, setIsCollapsed, isMobileOpen, setIsMobileOpen })
       <div className="sidebar-logo" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
           <Leaf size={32} />
-          {!isCollapsed && <span>NZ Tea Co.</span>}
+          {!isCollapsed && <span>NZ Tea</span>}
         </div>
         
         {/* Mobile only close button */}
