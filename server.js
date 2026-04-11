@@ -311,7 +311,11 @@ app.get('/api/customers', requireAuth, async (req, res) => {
 });
 
 // Start server
-app.listen(port, () => {
-  console.log(`🚀 NZ Tea Server running on http://localhost:${port}`);
-  console.log(`   Admin login: ${process.env.ADMIN_EMAIL || 'admin@nztea.com'}`);
-});
+if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
+  app.listen(port, () => {
+    console.log(`🚀 NZ Tea Server running on http://localhost:${port}`);
+    console.log(`   Admin login: ${process.env.ADMIN_EMAIL || 'admin@nztea.com'}`);
+  });
+}
+
+module.exports = app;
