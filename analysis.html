@@ -8,9 +8,12 @@
   <link rel="apple-touch-icon" href="images/logo-192.png">
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#000000">
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..800;1,400..800&family=Manrope:wght@200..800&display=swap" rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Supabase JS Library -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..800;1,400..800&family=Manrope:wght@200..800&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
   <style>
     * { font-family: 'Manrope', sans-serif; }
@@ -137,113 +140,94 @@
 </div>
 
 <script>
-  const token = localStorage.getItem('nztea_token');
-  if (!token) window.location.href = 'login.html';
-  document.getElementById('admin-email').textContent = localStorage.getItem('nztea_email') || 'Admin';
+  async function init() {
+    const session = await checkAuth();
+    if (!session) return;
+    document.getElementById('admin-email').textContent = session.user.email;
+    loadAnalytics();
+  }
 
   function logout() {
-    fetch('/api/auth/logout', { method:'POST', headers:{'Authorization':'Bearer '+token} });
-    localStorage.clear(); window.location.href = 'login.html';
+    handleLogout();
   }
 
   function fmt(n) { return '₹' + parseFloat(n || 0).toFixed(2); }
-
-  async function editInvested() {
-    const currentStr = document.getElementById('kpi-invested').textContent.replace(/[^0-9.]/g, '');
-    const amount = prompt("Enter total invested amount (₹):", currentStr || "0");
-    if (amount !== null && !isNaN(amount)) {
-      try {
-        const res = await fetch('/api/settings/invested', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-          body: JSON.stringify({ amount: parseFloat(amount) })
-        });
-        if (res.ok) {
-          const data = await res.json();
-          document.getElementById('kpi-invested').textContent = fmt(data.investedAmount);
-          document.getElementById('kpi-invested-label').textContent = 'Manually set';
-        } else {
-          alert('Failed to update');
-        }
-      } catch (err) {
-        console.error(err);
-        alert("Failed to update");
-      }
-    }
-  }
 
   const chartDefaults = {
     plugins: { legend: { labels: { color:'#a08070', font:{ size:11 }, boxWidth:10 } } }
   };
 
   async function loadAnalytics() {
-    const [statsRes, productsRes, ordersRes] = await Promise.all([
-      fetch('/api/stats', { headers:{'Authorization':'Bearer '+token} }),
-      fetch('/api/products', { headers:{'Authorization':'Bearer '+token} }),
-      fetch('/api/orders', { headers:{'Authorization':'Bearer '+token} }),
-    ]);
+    try {
+      const { data: products, error: pErr } = await supabase.from('products').select('*');
+      const { data: orders, error: oErr } = await supabase.from('orders').select('*');
 
-    if (statsRes.status === 401) { window.location.href = 'login.html'; return; }
+      if (pErr) throw pErr;
+      if (oErr) throw oErr;
 
-    const stats = await statsRes.json();
-    const products = await productsRes.json();
-    const orders = await ordersRes.json();
+      // KPIs
+      const totalRevenue = (orders || [])
+          .filter(o => o.status !== 'Cancelled')
+          .reduce((sum, o) => sum + parseFloat(o.total_amount), 0);
+          
+      const avgOrderValue = (orders || []).length > 0 ? totalRevenue / orders.length : 0;
+      const delivered = (orders || []).filter(o => o.status === 'Delivered').length;
+      const deliveryRate = (orders || []).length > 0 ? ((delivered / orders.length) * 100).toFixed(0) : 0;
 
-    // KPIs
-    const totalRevenue = stats.totalRevenue || 0;
-    const avgOrderValue = orders.length > 0 ? totalRevenue / orders.length : 0;
-    const delivered = orders.filter(o => o.status === 'Delivered').length;
-    const deliveryRate = orders.length > 0 ? ((delivered / orders.length) * 100).toFixed(0) : 0;
+      // Category revenue from products (simple aggregation)
+      const catProductCount = (products || []).reduce((acc, p) => {
+          acc[p.category] = (acc[p.category] || 0) + 1;
+          return acc;
+      }, {});
+      
+      const topCat = Object.entries(catProductCount).sort((a,b) => b[1]-a[1])[0]?.[0] || '—';
 
-    // Category revenue from products (price * stock difference is not real; use simple view)
-    const catRevenue = {};
-    products.forEach(p => {
-      catRevenue[p.category] = (catRevenue[p.category] || 0) + (p.price * (100 - p.stock_count));
-    });
-    const topCat = Object.entries(catRevenue).sort((a,b) => b[1]-a[1])[0]?.[0] || '—';
+      document.getElementById('kpi-revenue').textContent = fmt(totalRevenue);
+      document.getElementById('kpi-avg').textContent = fmt(avgOrderValue);
+      document.getElementById('kpi-delivery').textContent = deliveryRate + '%';
+      document.getElementById('kpi-top-cat').textContent = topCat;
 
-    document.getElementById('kpi-revenue').textContent = fmt(totalRevenue);
-    document.getElementById('kpi-avg').textContent = fmt(avgOrderValue);
-    document.getElementById('kpi-delivery').textContent = deliveryRate + '%';
-    document.getElementById('kpi-top-cat').textContent = topCat;
-
-    // Category chart (by number of products)
-    const catCounts = {};
-    products.forEach(p => catCounts[p.category] = (catCounts[p.category] || 0) + 1);
-    const catColors = ['#f59e0b','#60a5fa','#4ade80','#a78bfa','#f87171','#fb923c'];
-    new Chart(document.getElementById('category-chart').getContext('2d'), {
-      type: 'bar',
-      data: {
-        labels: Object.keys(catCounts),
-        datasets: [{
-          label: 'Products',
-          data: Object.values(catCounts),
-          backgroundColor: Object.keys(catCounts).map((_,i) => catColors[i % catColors.length] + '33'),
-          borderColor: Object.keys(catCounts).map((_,i) => catColors[i % catColors.length]),
-          borderWidth: 2, borderRadius: 6,
-        }]
-      },
-      options: {
-        responsive:true, maintainAspectRatio:false,
-        plugins: { ...chartDefaults.plugins },
-        scales: {
-          x: { grid:{ color:'rgba(255,255,255,0.03)' }, ticks:{ color:'#6a5048', font:{size:11} } },
-          y: { grid:{ color:'rgba(255,255,255,0.03)' }, ticks:{ color:'#6a5048', font:{size:11}, stepSize:1 } }
+      // Category chart (by number of products)
+      const catCounts = catProductCount;
+      const catColors = ['#f59e0b','#60a5fa','#4ade80','#a78bfa','#f87171','#fb923c'];
+      new Chart(document.getElementById('category-chart').getContext('2d'), {
+        type: 'bar',
+        data: {
+          labels: Object.keys(catCounts),
+          datasets: [{
+            label: 'Products',
+            data: Object.values(catCounts),
+            backgroundColor: Object.keys(catCounts).map((_,i) => catColors[i % catColors.length] + '33'),
+            borderColor: Object.keys(catCounts).map((_,i) => catColors[i % catColors.length]),
+            borderWidth: 2, borderRadius: 6,
+          }]
+        },
+        options: {
+          responsive:true, maintainAspectRatio:false,
+          plugins: { ...chartDefaults.plugins },
+          scales: {
+            x: { grid:{ color:'rgba(255,255,255,0.03)' }, ticks:{ color:'#6a5048', font:{size:11} } },
+            y: { grid:{ color:'rgba(255,255,255,0.03)' }, ticks:{ color:'#6a5048', font:{size:11}, stepSize:1 } }
+          }
         }
-      }
-    });
+      });
 
-
-
-    // Products table
-    document.getElementById('products-tbody').innerHTML = products.map(p => `
-      <tr style="border-bottom:1px solid #1a0f08">
-        <td style="padding:12px 16px;color:#fff;font-size:13px;">${p.name}</td>
-        <td style="padding:12px 16px;"><span class="badge ${catColorMap[p.category]||''}">${p.category}</span></td>
-        <td style="padding:12px 16px;color:#4ade80;font-weight:600">₹${parseFloat(p.price).toFixed(2)}</td>
-        <td style="padding:12px 16px;color:#fff;font-size:11px;">${(p.sizes||[]).join(', ')}</td>
-      </tr>`).join('');
+      // Products table
+      const catColorMap = { Green:'badge-pending', Black:'badge-unpaid', Herbal:'badge-paid', Oolong:'badge-shipped', Matcha:'badge-processing', Other:'badge-cancelled' };
+      
+      document.getElementById('products-tbody').innerHTML = (products || []).map(p => `
+        <tr style="border-bottom:1px solid #1a0f08">
+          <td style="padding:12px 16px;color:#fff;font-size:13px;">${p.name}</td>
+          <td style="padding:12px 16px;"><span class="badge ${catColorMap[p.category]||''}">${p.category}</span></td>
+          <td style="padding:12px 16px;color:#4ade80;font-weight:600">₹${parseFloat(p.price).toFixed(2)}</td>
+          <td style="padding:12px 16px;color:#fff;font-size:11px;">${(p.sizes||[]).join(', ')}</td>
+        </tr>`).join('');
+    } catch (err) {
+      console.error("Analytics Load Error:", err);
+    }
   }
+
+  init();
 
   loadAnalytics();
 

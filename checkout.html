@@ -8,7 +8,9 @@
   <link rel="apple-touch-icon" href="images/logo-192.png">
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#000000">
-  <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+    <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..800;1,400..800&family=Manrope:wght@200..800&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
   <script id="tailwind-config">
@@ -398,30 +400,59 @@
     const subtotal = cart.reduce((s, i) => s + (i.price * i.quantity), 0);
     const shipping = 0;
     const total = subtotal + shipping;
-    const paidAmt = paymentPlan === 'Partial' ? document.getElementById('f-paid-amount').value : total;
-
-    const body = {
-      customer: customerDetails,
-      items: cart.map(i => ({ productId: i.id, quantity: i.quantity, price: i.price, size: i.size })),
-      totalAmount: total,
-      paymentType: paymentPlan,
-      paidAmount: paidAmt
-    };
+    const paidAmt = paymentPlan === 'Partial' ? document.getElementById('f-paid-amount').value : 0;
 
     try {
-      const res = await fetch('/api/orders', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body)
-      });
-      const data = await res.json();
+      // 1. Create/Get Customer (Upsert by email)
+      const { data: customer, error: custErr } = await supabase
+          .from('customers')
+          .upsert({ 
+              name: customerDetails.name, 
+              email: customerDetails.email, 
+              phone: customerDetails.phone, 
+              address: customerDetails.address 
+          }, { onConflict: 'email' })
+          .select()
+          .single();
+      
+      if (custErr) throw custErr;
 
-      if (!res.ok) throw new Error(data.error || 'Failed to place order');
+      // 2. Create Order
+      const { data: order, error: orderErr } = await supabase
+          .from('orders')
+          .insert({
+              customer_id: customer.id,
+              total_amount: total,
+              paid_amount: paidAmt,
+              payment_type: paymentPlan,
+              status: 'Pending',
+              payment_status: 'Unpaid'
+          })
+          .select()
+          .single();
+
+      if (orderErr) throw orderErr;
+
+      // 3. Create Order Items
+      const orderItems = cart.map(i => ({
+          order_id: order.id,
+          product_id: i.id,
+          quantity: i.quantity,
+          unit_price: i.price,
+          size: i.size
+      }));
+
+      const { error: itemsErr } = await supabase
+          .from('order_items')
+          .insert(orderItems);
+
+      if (itemsErr) throw itemsErr;
 
       localStorage.removeItem('nztea_cart');
-      document.getElementById('success-order-id').textContent = `Order ID: #${data.orderId.slice(0,8).toUpperCase()}`;
+      document.getElementById('success-order-id').textContent = `Order ID: #${order.id.slice(0,8).toUpperCase()}`;
       goStep(4);
     } catch (err) {
+      console.error("Order error:", err);
       alert('Error: ' + err.message);
       btn.disabled = false;
       btn.innerHTML = '<span class="material-symbols-outlined text-[18px]">check_circle</span> Place Order';

@@ -8,8 +8,11 @@
   <link rel="apple-touch-icon" href="images/logo-192.png">
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#000000">
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..800;1,400..800&family=Manrope:wght@200..800&display=swap" rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Supabase JS Library -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..800;1,400..800&family=Manrope:wght@200..800&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
   <style>
     * { font-family: 'Manrope', sans-serif; }
@@ -182,12 +185,8 @@
       <div>
         <label class="block text-white/50 text-xs uppercase tracking-widest mb-2">Product Image</label>
         <div class="flex gap-2 items-center">
-            <input id="f-image" type="text" class="form-input flex-1" placeholder="Image URL or choose file..." />
-            <input type="file" id="f-image-file" accept="image/*" class="hidden" onchange="handleFileUpload(event)" />
-            <button type="button" onclick="document.getElementById('f-image-file').click()" class="bg-white/10 hover:bg-white/20 text-white px-4 py-[10px] rounded-lg text-sm transition-colors whitespace-nowrap border border-white/10 flex items-center gap-2">
-                <span class="material-symbols-outlined text-[16px]">upload</span> Upload
-            </button>
-        </div>
+          <input id="f-image" type="text" class="form-input flex-1" placeholder="Image URL (e.g. https://...)" />
+      </div>
       </div>
       <div class="flex items-center gap-3">
         <input id="f-available" type="checkbox" checked class="w-4 h-4 accent-orange-500" />
@@ -222,16 +221,15 @@
 </div>
 
 <script>
-  const token = localStorage.getItem('nztea_token');
-  if (!token) window.location.href = 'login.html';
-  document.getElementById('admin-email').textContent = localStorage.getItem('nztea_email') || 'Admin';
-
-  let products = [];
-  let deleteTarget = null;
+  async function init() {
+    const session = await checkAuth();
+    if (!session) return;
+    document.getElementById('admin-email').textContent = session.user.email;
+    loadProducts();
+  }
 
   function logout() {
-    fetch('/api/auth/logout', { method:'POST', headers:{'Authorization':'Bearer '+token} });
-    localStorage.clear(); window.location.href = 'login.html';
+    handleLogout();
   }
 
   function showToast(msg, type = 'success') {
@@ -242,50 +240,20 @@
     setTimeout(() => t.classList.remove('show'), 3000);
   }
 
-  async function handleFileUpload(e) {
-    const file = e.target.files[0];
-    if (!file) return;
-    if (file.size > 5 * 1024 * 1024) { showToast('File size must be under 5MB', 'error'); return; }
-
-    const reader = new FileReader();
-    reader.onload = async (ev) => {
-      const base64 = ev.target.result;
-      const btn = e.target.nextElementSibling;
-      const originalText = btn.innerHTML;
-      btn.innerHTML = '<span class="material-symbols-outlined text-[16px]">hourglass_empty</span>...';
-      btn.disabled = true;
-
-      try {
-        const res = await fetch('/api/upload', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-          body: JSON.stringify({ filename: file.name, base64 })
-        });
-        const data = await res.json();
-        if (res.ok) {
-          document.getElementById('f-image').value = data.url;
-          showToast('Image uploaded successfully');
-        } else {
-          showToast(data.error || 'Upload failed', 'error');
-        }
-      } catch (err) {
-        console.error('Upload Error:', err);
-        showToast('Upload failed: ' + (err.message || 'Server error'), 'error');
-      } finally {
-        btn.innerHTML = originalText;
-        btn.disabled = false;
-        e.target.value = '';
-      }
-    };
-    reader.readAsDataURL(file);
-  }
+  let products = [];
+  let deleteTarget = null;
 
   async function loadProducts() {
-    const res = await fetch('/api/products', { headers:{'Authorization':'Bearer '+token} });
-    if (res.status === 401) { window.location.href = 'login.html'; return; }
-    products = await res.json();
-    document.getElementById('product-count').textContent = `${products.length} products`;
-    renderTable();
+    try {
+      const { data, error } = await supabase.from('products').select('*').order('name');
+      if (error) throw error;
+      products = data;
+      document.getElementById('product-count').textContent = `${products.length} products`;
+      renderTable();
+    } catch (err) {
+      console.error("Load products error:", err);
+      showToast('Failed to load products', 'error');
+    }
   }
 
   function renderTable() {
@@ -367,9 +335,16 @@
 
   async function confirmDelete() {
     if (!deleteTarget) return;
-    const res = await fetch(`/api/products/${deleteTarget}`, { method:'DELETE', headers:{'Authorization':'Bearer '+token} });
-    if (res.ok) { showToast('Product deleted'); closeDeleteModal(); loadProducts(); }
-    else { showToast('Failed to delete product', 'error'); }
+    try {
+      const { error } = await supabase.from('products').delete().eq('id', deleteTarget);
+      if (error) throw error;
+      showToast('Product deleted');
+      closeDeleteModal();
+      loadProducts();
+    } catch (err) {
+      console.error("Delete error:", err);
+      showToast('Failed to delete product', 'error');
+    }
   }
 
   document.getElementById('product-form').addEventListener('submit', async (e) => {
@@ -387,20 +362,23 @@
       in_stock: document.getElementById('f-available').checked
     };
 
-    const url = id ? `/api/products/${id}` : '/api/products';
-    const method = id ? 'PUT' : 'POST';
-    const res = await fetch(url, { method, headers:{'Authorization':'Bearer '+token,'Content-Type':'application/json'}, body: JSON.stringify(body) });
+    try {
+      const { error } = id 
+        ? await supabase.from('products').update(body).eq('id', id)
+        : await supabase.from('products').insert([body]);
 
-    if (res.ok) {
+      if (error) throw error;
+
       showToast(id ? 'Product updated' : 'Product added');
-      closeModal(); loadProducts();
-    } else {
-      const err = await res.json();
-      showToast(err.error || 'Failed to save product', 'error');
+      closeModal();
+      loadProducts();
+    } catch (err) {
+      console.error("Save error:", err);
+      showToast(err.message || 'Failed to save product', 'error');
     }
   });
 
-  loadProducts();
+  init();
 
   function toggleSidebar() {
     document.querySelector('.sidebar').classList.toggle('open');

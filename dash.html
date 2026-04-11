@@ -11,6 +11,9 @@
   <meta name="theme-color" content="#000000">
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Supabase JS Library -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..800;1,400..800&family=Manrope:wght@200..800&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
   <style>
@@ -266,14 +269,11 @@
   document.getElementById('admin-email').textContent = localStorage.getItem('nztea_email') || 'Admin';
   document.getElementById('date-display').textContent = new Date().toLocaleDateString('en-US', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
 
-  function logout() {
-    fetch('/api/auth/logout', { method: 'POST', headers: { 'Authorization': 'Bearer ' + token } });
-    localStorage.removeItem('nztea_token');
-    localStorage.removeItem('nztea_email');
-    window.location.href = 'login.html';
+  async function logout() {
+    await handleLogout();
   }
 
-  function fmt(n) { return '₹' + parseFloat(n).toFixed(2); }
+  function fmt(n) { return '₹' + parseFloat(n || 0).toFixed(2); }
   function fmtDate(d) { return new Date(d).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' }); }
   function statusBadge(s) {
     const cls = { Pending:'badge-pending', Processing:'badge-processing', Shipped:'badge-shipped', Delivered:'badge-delivered', Cancelled:'badge-cancelled' };
@@ -287,23 +287,8 @@
     const currentStr = document.getElementById('stat-invested').textContent.replace(/[^0-9.]/g, '');
     const amount = prompt("Enter total invested amount (₹):", currentStr || "0");
     if (amount !== null && !isNaN(amount)) {
-      try {
-        const res = await fetch('/api/settings/invested', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-          body: JSON.stringify({ amount: parseFloat(amount) })
-        });
-        if (res.ok) {
-          const data = await res.json();
-          document.getElementById('stat-invested').textContent = fmt(data.investedAmount);
-          document.getElementById('stat-invested-label').textContent = 'Manually set';
-        } else {
-          alert('Failed to update');
-        }
-      } catch (err) {
-        console.error(err);
-        alert("Failed to update");
-      }
+        localStorage.setItem('nztea_invested', amount);
+        document.getElementById('stat-invested').textContent = fmt(amount);
     }
   }
 
@@ -311,29 +296,58 @@
 
   async function loadDashboard() {
     try {
-      const res = await fetch('/api/stats', { headers: { 'Authorization': 'Bearer ' + token } });
-      if (res.status === 401) { window.location.href = 'login.html'; return; }
-      const data = await res.json();
+      const session = await checkAuth();
+      if (!session) return;
+      
+      document.getElementById('admin-email').textContent = session.user.email;
 
-      document.getElementById('stat-revenue').textContent = fmt(data.totalRevenue);
-      document.getElementById('stat-invested').textContent = fmt(data.totalInvested || 0);
-      document.getElementById('stat-orders').textContent = data.totalOrders;
-      document.getElementById('stat-pending-label').textContent = `${data.pendingOrders} pending`;
-      document.getElementById('stat-products').textContent = data.totalProducts;
-      document.getElementById('stat-stock-label').textContent = `${data.totalStock} units total`;
-      document.getElementById('stat-customers').textContent = data.totalCustomers;
+      // Fetch Data directly from Supabase
+      const [
+          { data: products },
+          { data: orders },
+          { data: customers }
+      ] = await Promise.all([
+          supabase.from('products').select('*'),
+          supabase.from('orders').select('*, customers(name)').order('created_at', { ascending: false }),
+          supabase.from('customers').select('*')
+      ]);
+
+      // Calculate Stats
+      const totalRevenue = (orders || [])
+          .filter(o => o.status !== 'Cancelled')
+          .reduce((sum, o) => sum + parseFloat(o.total_amount), 0);
+          
+      const totalOrders = (orders || []).length;
+      const pendingOrders = (orders || []).filter(o => o.status === 'Pending').length;
+      const totalProducts = (products || []).length;
+      const totalStock = (products || []).reduce((sum, p) => sum + (p.stock_count || 0), 0);
+      const totalCustomers = (customers || []).length;
+      const lowStockProducts = (products || []).filter(p => (p.stock_count || 0) < 10);
+      
+      const statusCounts = (orders || []).reduce((acc, o) => {
+          acc[o.status] = (acc[o.status] || 0) + 1;
+          return acc;
+      }, {});
+
+      // Update UI
+      document.getElementById('stat-revenue').textContent = fmt(totalRevenue);
+      document.getElementById('stat-invested').textContent = fmt(localStorage.getItem('nztea_invested') || 0);
+      document.getElementById('stat-orders').textContent = totalOrders;
+      document.getElementById('stat-pending-label').textContent = `${pendingOrders} pending`;
+      document.getElementById('stat-products').textContent = totalProducts;
+      document.getElementById('stat-stock-label').textContent = `${totalStock} units total`;
+      document.getElementById('stat-customers').textContent = totalCustomers;
 
       // Low stock
-      if (data.lowStockProducts && data.lowStockProducts.length > 0) {
+      if (lowStockProducts.length > 0) {
         document.getElementById('low-stock-section').classList.remove('hidden');
-        document.getElementById('low-stock-list').innerHTML = data.lowStockProducts
+        document.getElementById('low-stock-list').innerHTML = lowStockProducts
           .map(p => `<p>• ${p.name}: <strong>${p.stock_count}</strong> units left</p>`).join('');
       }
 
       // Status chart
-      const statusData = data.statusCounts || {};
-      const labels = Object.keys(statusData);
-      const values = Object.values(statusData);
+      const labels = Object.keys(statusCounts);
+      const values = Object.values(statusCounts);
       if (labels.length > 0) {
         const colors = { Pending:'#f59e0b', Processing:'#60a5fa', Shipped:'#a78bfa', Delivered:'#4ade80', Cancelled:'#f87171' };
         const ctx = document.getElementById('status-chart').getContext('2d');
@@ -355,10 +369,11 @@
 
       // Recent orders table
       const tbody = document.getElementById('orders-tbody');
-      if (!data.recentOrders || data.recentOrders.length === 0) {
+      const recentOrders = (orders || []).slice(0, 10);
+      if (recentOrders.length === 0) {
         tbody.innerHTML = '<tr><td colspan="6" class="text-center text-white/30 py-8">No orders yet</td></tr>';
       } else {
-        tbody.innerHTML = data.recentOrders.map(o => `
+        tbody.innerHTML = recentOrders.map(o => `
           <tr>
             <td class="text-orange-400 font-mono text-xs">#${o.id.slice(0, 8).toUpperCase()}</td>
             <td>${o.customers?.name || '—'}</td>
@@ -369,7 +384,7 @@
           </tr>`).join('');
       }
     } catch (err) {
-      console.error(err);
+      console.error("Dashboard Load Error:", err);
     }
   }
 

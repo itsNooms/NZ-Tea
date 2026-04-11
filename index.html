@@ -11,6 +11,8 @@
     <link rel="icon" type="image/png" href="images/logo-192.png">
     <link rel="apple-touch-icon" href="images/logo-192.png">
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js"></script>
     <link
         href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..800;1,400..800&amp;family=Manrope:wght@200..800&amp;display=swap"
         rel="stylesheet" />
@@ -445,11 +447,12 @@
 
         async function loadProducts() {
             try {
-                const res = await fetch('/api/products');
-                allProducts = await res.json();
+                const { data, error } = await supabase.from('products').select('*').order('created_at', { ascending: false });
+                if (error) throw error;
+                allProducts = data;
                 renderFilteredProducts(allProducts);
             } catch (err) {
-                console.error(err);
+                console.error("Failed to load products:", err);
             }
         }
 

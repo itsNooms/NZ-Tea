@@ -10,8 +10,11 @@
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#000000">
   <meta http-equiv="Content-Security-Policy"
-    content="default-src 'self' https:; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' http://localhost:3000 https://*.supabase.co; img-src 'self' data: https:;">
+    content="default-src 'self' https:; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' http://localhost:3000 https://*.supabase.co; img-src 'self' data: https:;">
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Supabase JS Library -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
   <link
     href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..800;1,400..800&family=Manrope:wght@200..800&display=swap"
     rel="stylesheet" />
@@ -70,13 +73,17 @@
   <!-- Custom Error Modal -->
   <div id="error-modal" class="fixed inset-0 z-50 flex items-center justify-center hidden px-4">
     <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closeModal()"></div>
-    <div class="relative bg-tea border border-white/10 p-6 rounded-2xl max-w-sm w-full shadow-2xl scale-95 opacity-0 transition-all duration-300" id="modal-content">
+    <div
+      class="relative bg-tea border border-white/10 p-6 rounded-2xl max-w-sm w-full shadow-2xl scale-95 opacity-0 transition-all duration-300"
+      id="modal-content">
       <div class="w-12 h-12 bg-red-500/20 rounded-full flex items-center justify-center mb-4 mx-auto">
         <span class="material-symbols-outlined text-red-500 text-2xl">error</span>
       </div>
-      <h3 class="text-xl text-white text-center font-headline mb-2" id="modal-title">Access Denied</h3>
-      <p class="text-white/60 text-center text-sm mb-6" id="modal-text">Wrong credentials. Please check your email and password and try again.</p>
-      <button onclick="closeModal()" class="w-full bg-white/10 hover:bg-white/20 text-white font-semibold py-2 rounded-lg transition-colors border border-white/10">
+      <h3 class="text-xl text-white text-center font-headline mb-2">Access Denied</h3>
+      <p class="text-white/60 text-center text-sm mb-6">Wrong credentials. Please check your email and password and try
+        again.</p>
+      <button onclick="closeModal()"
+        class="w-full bg-white/10 hover:bg-white/20 text-white font-semibold py-2 rounded-lg transition-colors border border-white/10">
         Go Back
       </button>
     </div>
@@ -133,7 +140,7 @@
       </div>
     </div>
 
-    <p class="text-center text-white/20 text-xs mt-6">© 2024 NZ Tea. All rights reserved.</p>
+    <p class="text-center text-white/20 text-xs mt-6">© 2026 NZ Tea. All rights reserved.</p>
   </div>
 
   <script>
@@ -206,21 +213,17 @@
       const password = document.getElementById('password').value;
 
       try {
-        const res = await fetch('/api/auth/login', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, password })
+        // Direct Supabase Authentication
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email: email,
+          password: password,
         });
 
-        const data = await res.json();
-
-        if (!res.ok) {
-          throw new Error(data.error || 'Login failed');
+        if (error) {
+          throw error;
         }
 
-        localStorage.setItem('nztea_token', data.token);
-        localStorage.setItem('nztea_email', data.email);
-
+        // Redirect to dashboard on success
         window.location.href = 'dash.html';
 
       } catch (err) {
@@ -228,13 +231,8 @@
         const modalTitle = document.getElementById('modal-title');
         const modalText = document.getElementById('modal-text');
         
-        if (err.message === 'Invalid email or password.') {
-          modalTitle.textContent = 'Access Denied';
-          modalText.textContent = 'Wrong credentials. Please check your email and password and try again.';
-        } else {
-          modalTitle.textContent = 'Connection Error';
-          modalText.textContent = 'Could not connect to the server. Please ensure the backend is running.';
-        }
+        modalTitle.textContent = 'Access Denied';
+        modalText.textContent = err.message || 'Invalid credentials. Please try again.';
         
         showModal();
 

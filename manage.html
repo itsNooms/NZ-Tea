@@ -8,8 +8,11 @@
   <link rel="apple-touch-icon" href="images/logo-192.png">
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#000000">
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..800;1,400..800&family=Manrope:wght@200..800&display=swap" rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Supabase JS Library -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..800;1,400..800&family=Manrope:wght@200..800&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
   <style>
     * { font-family: 'Manrope', sans-serif; }
@@ -149,16 +152,15 @@
 </div>
 
 <script>
-  const token = localStorage.getItem('nztea_token');
-  if (!token) window.location.href = 'login.html';
-  document.getElementById('admin-email').textContent = localStorage.getItem('nztea_email') || 'Admin';
-
-  let orders = [];
-  let currentOrder = null;
+  async function init() {
+    const session = await checkAuth();
+    if (!session) return;
+    document.getElementById('admin-email').textContent = session.user.email;
+    loadOrders();
+  }
 
   function logout() {
-    fetch('/api/auth/logout', { method:'POST', headers:{'Authorization':'Bearer '+token} });
-    localStorage.clear(); window.location.href = 'login.html';
+    handleLogout();
   }
 
   function showToast(msg, type = 'success') {
@@ -181,11 +183,20 @@
   }
 
   async function loadOrders() {
-    const res = await fetch('/api/orders', { headers:{'Authorization':'Bearer '+token} });
-    if (res.status === 401) { window.location.href = 'login.html'; return; }
-    orders = await res.json();
-    document.getElementById('order-count').textContent = `${orders.length} orders`;
-    renderTable();
+    try {
+      const { data, error } = await supabase
+          .from('orders')
+          .select('*, customers(*), order_items(*, products(*))')
+          .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      orders = data;
+      document.getElementById('order-count').textContent = `${orders.length} orders`;
+      renderTable();
+    } catch (err) {
+      console.error("Load orders error:", err);
+      showToast('Failed to load orders', 'error');
+    }
   }
 
   function renderTable() {
@@ -311,16 +322,25 @@
     if (!currentOrder) return;
     const status = document.getElementById('new-status').value;
     const payment_status = document.getElementById('new-payment').value;
-    const res = await fetch(`/api/orders/${currentOrder.id}`, {
-      method: 'PUT',
-      headers: { 'Authorization':'Bearer '+token, 'Content-Type':'application/json' },
-      body: JSON.stringify({ status, payment_status })
-    });
-    if (res.ok) { showToast('Order updated'); closeModal(); loadOrders(); }
-    else { showToast('Failed to update order', 'error'); }
+
+    try {
+      const { error } = await supabase
+          .from('orders')
+          .update({ status, payment_status })
+          .eq('id', currentOrder.id);
+
+      if (error) throw error;
+      
+      showToast('Order updated');
+      closeModal();
+      loadOrders();
+    } catch (err) {
+      console.error("Update error:", err);
+      showToast('Failed to update order', 'error');
+    }
   }
 
-  loadOrders();
+  init();
 
   function toggleSidebar() {
     document.querySelector('.sidebar').classList.toggle('open');
