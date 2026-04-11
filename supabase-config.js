@@ -3,7 +3,10 @@ const SUPABASE_URL = 'https://nprnngtixtdazegpvinq.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5wcm5uZ3RpeHRkYXplZ3B2aW5xIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU4MjM3NTMsImV4cCI6MjA5MTM5OTc1M30.HUfPbZ2wsOHzXZ16L0rXn7izquNroyn6KH7aGzmSnxQ';
 
 // Initialize the Supabase client
-const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const { createClient } = window.supabase;
+const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// Expose the client globally as 'supabase' for all HTML pages to use
+window.supabase = supabaseClient;
 
 /**
  * NZ Tea Auth Helper
