@@ -263,10 +263,6 @@
     document.getElementById('sidebar-overlay').classList.toggle('show');
   }
 
-  const token = localStorage.getItem('nztea_token');
-  if (!token) window.location.href = 'login.html';
-
-  document.getElementById('admin-email').textContent = localStorage.getItem('nztea_email') || 'Admin';
   document.getElementById('date-display').textContent = new Date().toLocaleDateString('en-US', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
 
   async function logout() {
