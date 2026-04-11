@@ -48,7 +48,7 @@ function requireAuth(req, res, next) {
 app.post('/api/auth/login', (req, res) => {
   const { email, password } = req.body;
   const adminEmail = process.env.ADMIN_EMAIL || 'admin@nztea.com';
-  const adminPassword = process.env.ADMIN_PASSWORD || 'admin123';
+  const adminPassword = process.env.ADMIN_PASSWORD || 'FaizanNZtea';
 
   if (email === adminEmail && password === adminPassword) {
     const token = crypto.randomUUID();
@@ -136,7 +136,7 @@ app.post('/api/upload', requireAuth, (req, res) => {
   try {
     const { filename, base64 } = req.body;
     if (!filename || !base64) return res.status(400).json({ error: 'Missing file data' });
-    
+
     const imagesDir = path.join(__dirname, 'images');
     if (!fs.existsSync(imagesDir)) fs.mkdirSync(imagesDir);
 
@@ -147,7 +147,7 @@ app.post('/api/upload', requireAuth, (req, res) => {
     const ext = filename.split('.').pop() || 'png';
     const uniqueName = 'upload-' + Date.now() + '-' + Math.round(Math.random() * 1E9) + '.' + ext;
     const buffer = Buffer.from(matches[2], 'base64');
-    
+
     fs.writeFileSync(path.join(imagesDir, uniqueName), buffer);
     res.json({ url: 'images/' + uniqueName });
   } catch (err) {
@@ -235,36 +235,36 @@ app.get('/api/orders', requireAuth, async (req, res) => {
 });
 
 app.post('/api/orders', async (req, res) => {
-    const { customer, items, totalAmount, paymentType, paidAmount } = req.body;
-    try {
-      let customerId;
-      const { data: existing } = await supabase
-        .from('customers').select('id').eq('email', customer.email).single();
+  const { customer, items, totalAmount, paymentType, paidAmount } = req.body;
+  try {
+    let customerId;
+    const { data: existing } = await supabase
+      .from('customers').select('id').eq('email', customer.email).single();
 
-      if (existing) {
-        customerId = existing.id;
-        // Optional: Update customer details if they changed
-        await supabase.from('customers').update({ name: customer.name, phone: customer.phone, address: customer.address }).eq('id', customerId);
-      } else {
-        const { data: newCust, error: custErr } = await supabase
-          .from('customers')
-          .insert([{ name: customer.name, email: customer.email, phone: customer.phone, address: customer.address }])
-          .select().single();
-        if (custErr) throw custErr;
-        customerId = newCust.id;
-      }
-
-      const { data: order, error: orderErr } = await supabase
-        .from('orders')
-        .insert([{ 
-          customer_id: customerId, 
-          total_amount: totalAmount, 
-          status: 'Pending', 
-          payment_status: paymentType === 'Full' ? 'Paid' : 'Unpaid',
-          payment_type: paymentType || 'Full',
-          paid_amount: parseFloat(paidAmount || 0)
-        }])
+    if (existing) {
+      customerId = existing.id;
+      // Optional: Update customer details if they changed
+      await supabase.from('customers').update({ name: customer.name, phone: customer.phone, address: customer.address }).eq('id', customerId);
+    } else {
+      const { data: newCust, error: custErr } = await supabase
+        .from('customers')
+        .insert([{ name: customer.name, email: customer.email, phone: customer.phone, address: customer.address }])
         .select().single();
+      if (custErr) throw custErr;
+      customerId = newCust.id;
+    }
+
+    const { data: order, error: orderErr } = await supabase
+      .from('orders')
+      .insert([{
+        customer_id: customerId,
+        total_amount: totalAmount,
+        status: 'Pending',
+        payment_status: paymentType === 'Full' ? 'Paid' : 'Unpaid',
+        payment_type: paymentType || 'Full',
+        paid_amount: parseFloat(paidAmount || 0)
+      }])
+      .select().single();
     if (orderErr) throw orderErr;
 
     for (const item of items) {
