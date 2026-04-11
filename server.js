@@ -141,13 +141,12 @@ app.post('/api/settings/invested', requireAuth, (req, res) => {
   res.json({ success: true, investedAmount: settings.investedAmount });
 });
 
-const path = require('path');
 app.post('/api/upload', requireAuth, (req, res) => {
   try {
     const { filename, base64 } = req.body;
     if (!filename || !base64) return res.status(400).json({ error: 'Missing file data' });
 
-    const imagesDir = path.join(__dirname, 'images');
+    const imagesDir = path.join(process.cwd(), 'images');
     if (!fs.existsSync(imagesDir)) fs.mkdirSync(imagesDir);
 
     const matches = base64.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/);
