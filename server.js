@@ -7,11 +7,19 @@ const { createClient } = require('@supabase/supabase-js');
 const app = express();
 const port = process.env.PORT || 3000;
 
-// Init Supabase
-const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY
-);
+// Init Supabase safely
+let supabase;
+try {
+  if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    console.error('❌ DISASTER: Supabase environment variables are MISSING in Vercel settings!');
+  }
+  supabase = createClient(
+    process.env.SUPABASE_URL || 'https://placeholder.supabase.co',
+    process.env.SUPABASE_SERVICE_ROLE_KEY || 'placeholder'
+  );
+} catch (e) {
+  console.error('❌ Supabase Init Error:', e.message);
+}
 
 // In-memory session store
 const sessions = new Set();
