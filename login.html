@@ -74,8 +74,8 @@
       <div class="w-12 h-12 bg-red-500/20 rounded-full flex items-center justify-center mb-4 mx-auto">
         <span class="material-symbols-outlined text-red-500 text-2xl">error</span>
       </div>
-      <h3 class="text-xl text-white text-center font-headline mb-2">Access Denied</h3>
-      <p class="text-white/60 text-center text-sm mb-6">Wrong credentials. Please check your email and password and try again.</p>
+      <h3 class="text-xl text-white text-center font-headline mb-2" id="modal-title">Access Denied</h3>
+      <p class="text-white/60 text-center text-sm mb-6" id="modal-text">Wrong credentials. Please check your email and password and try again.</p>
       <button onclick="closeModal()" class="w-full bg-white/10 hover:bg-white/20 text-white font-semibold py-2 rounded-lg transition-colors border border-white/10">
         Go Back
       </button>
@@ -225,6 +225,17 @@
 
       } catch (err) {
         console.error('Login error:', err);
+        const modalTitle = document.getElementById('modal-title');
+        const modalText = document.getElementById('modal-text');
+        
+        if (err.message === 'Invalid email or password.') {
+          modalTitle.textContent = 'Access Denied';
+          modalText.textContent = 'Wrong credentials. Please check your email and password and try again.';
+        } else {
+          modalTitle.textContent = 'Connection Error';
+          modalText.textContent = 'Could not connect to the server. Please ensure the backend is running.';
+        }
+        
         showModal();
 
         btn.disabled = false;

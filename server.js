@@ -60,11 +60,17 @@ app.post('/api/auth/login', (req, res) => {
   const adminEmail = process.env.ADMIN_EMAIL || 'admin@nztea.com';
   const adminPassword = process.env.ADMIN_PASSWORD || 'FaizanNZTea';
 
+  console.log(`[AUTH] Login attempt: ${email}`);
   if (email === adminEmail && password === adminPassword) {
+    console.log('[AUTH] Success');
     const token = crypto.randomUUID();
     sessions.add(token);
     res.json({ token, email });
   } else {
+    console.log(`[AUTH] Failed. Match email: ${email === adminEmail}, Match password: ${password === adminPassword}`);
+    if (password !== adminPassword) {
+        console.log(`[AUTH] Debug: Input length ${password.length}, Expected length ${adminPassword.length}`);
+    }
     res.status(401).json({ error: 'Invalid email or password.' });
   }
 });
