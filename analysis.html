@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NZ Tea | Analytics</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..800;1,400..800&family=Manrope:wght@200..800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+  <style>
+    * { font-family: 'Manrope', sans-serif; }
+    h1,h2,h3,h4 { font-family: 'EB Garamond', serif; }
+    .material-symbols-outlined { font-variation-settings:'FILL' 0,'wght' 300,'GRAD' 0,'opsz' 24; vertical-align:middle; }
+    body { background:#0f0a07; color:#e8e0d8; min-height:100dvh; }
+    .sidebar { background:#18100a; border-right:1px solid #2a1a0f; width:240px; min-height:100dvh; position:fixed; top:0; left:0; z-index:40; transition: transform 0.3s ease; }
+    .main-content { margin-left:240px; min-height:100dvh; }
+    .sidebar-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:39; }
+    .sidebar-overlay.show { display:block; }
+    @media (max-width: 768px) {
+      .sidebar { transform: translateX(-100%); }
+      .sidebar.open { transform: translateX(0); box-shadow: 4px 0 24px rgba(0,0,0,0.6); }
+      .main-content { margin-left: 0; }
+    }
+    .nav-link { display:flex; align-items:center; gap:12px; padding:10px 20px; border-radius:8px; margin:2px 12px; color:#a08070; font-size:14px; transition:all 0.2s; text-decoration:none; cursor:pointer; }
+    .nav-link:hover { background:rgba(194,101,42,0.1); color:#e8c8a0; }
+    .nav-link.active { background:rgba(194,101,42,0.15); color:#f0a060; border:1px solid rgba(194,101,42,0.2); }
+    .card { background:#18100a; border:1px solid #2a1a0f; border-radius:12px; padding:24px; }
+    .badge { border-radius:20px; padding:3px 10px; font-size:11px; font-weight:600; display:inline-block; }
+    @keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+    .fade-in { animation: fadeIn 0.4s ease forwards; }
+  </style>
+</head>
+<body>
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+<!-- Sidebar -->
+<aside class="sidebar flex flex-col">
+  <div class="p-6 border-b border-[#2a1a0f]">
+    <h1 class="text-2xl font-serif italic text-white tracking-tight">NZ Tea</h1>
+    <p class="text-orange-700/60 text-xs tracking-widest mt-1">SELLER PORTAL</p>
+  </div>
+  <nav class="flex-1 py-4">
+    <a href="dash.html" class="nav-link"><span class="material-symbols-outlined text-[20px]">dashboard</span> Dashboard</a>
+    <a href="inventory.html" class="nav-link"><span class="material-symbols-outlined text-[20px]">inventory_2</span> Inventory</a>
+    <a href="manage.html" class="nav-link"><span class="material-symbols-outlined text-[20px]">receipt_long</span> Orders</a>
+    <a href="analysis.html" class="nav-link active"><span class="material-symbols-outlined text-[20px]">bar_chart</span> Analytics</a>
+  </nav>
+  <div class="p-4 border-t border-[#2a1a0f]">
+    <div class="flex items-center gap-3 mb-3 px-2">
+      <div class="w-8 h-8 bg-orange-800/30 rounded-full flex items-center justify-center">
+        <span class="material-symbols-outlined text-[16px] text-orange-400">person</span>
+      </div>
+      <div>
+        <p class="text-white text-xs font-semibold" id="admin-email">Admin</p>
+        <p class="text-white/30 text-[10px]">Seller Account</p>
+      </div>
+    </div>
+    <button onclick="logout()" class="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-white/40 hover:text-red-400 hover:bg-red-500/10 transition-all text-xs">
+      <span class="material-symbols-outlined text-[16px]">logout</span> Sign Out
+    </button>
+  </div>
+</aside>
+
+<!-- Main -->
+<div class="main-content">
+  <header class="sticky top-0 z-30 bg-[#0f0a07]/80 backdrop-blur border-b border-[#2a1a0f] px-4 md:px-8 py-4 flex items-center gap-3">
+    <button class="md:hidden text-white/60 hover:text-white flex-shrink-0" onclick="toggleSidebar()">
+      <span class="material-symbols-outlined">menu</span>
+    </button>
+    <div>
+      <h2 class="text-xl text-white font-headline">Analytics</h2>
+      <p class="text-white/30 text-xs">Business overview & performance</p>
+    </div>
+  </header>
+
+  <div class="p-4 md:p-8 fade-in space-y-4 md:space-y-6">
+    <!-- KPI Row -->
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-4">
+      <div class="card">
+        <p class="text-white/40 text-xs uppercase tracking-widest mb-2">Total Revenue</p>
+        <p class="text-3xl text-white font-semibold" id="kpi-revenue">—</p>
+        <p class="text-green-400 text-xs mt-1" id="kpi-revenue-sub">All orders</p>
+      </div>
+      <div class="card">
+        <p class="text-white/40 text-xs uppercase tracking-widest mb-2">Avg. Order Value</p>
+        <p class="text-3xl text-white font-semibold" id="kpi-avg">—</p>
+        <p class="text-white/30 text-xs mt-1">Per order</p>
+      </div>
+      <div class="card">
+        <p class="text-white/40 text-xs uppercase tracking-widest mb-2">Delivery Rate</p>
+        <p class="text-3xl text-white font-semibold" id="kpi-delivery">—</p>
+        <p class="text-white/30 text-xs mt-1">Orders delivered</p>
+      </div>
+      <div class="card">
+        <p class="text-white/40 text-xs uppercase tracking-widest mb-2">Top Category</p>
+        <p class="text-3xl text-white font-semibold" id="kpi-top-cat">—</p>
+        <p class="text-white/30 text-xs mt-1">By revenue</p>
+      </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+      <!-- Revenue by Category -->
+      <div class="card">
+        <h3 class="text-white font-headline text-lg mb-4">Revenue by Category</h3>
+        <div style="height:260px;position:relative;">
+          <canvas id="category-chart"></canvas>
+        </div>
+      </div>
+    </div>
+
+
+
+    <!-- Top Products Table -->
+    <div class="card">
+      <h3 class="text-white font-headline text-lg mb-4">Product Performance</h3>
+      <div class="overflow-x-auto">
+        <table style="width:100%; min-width:650px;">
+          <thead>
+            <tr>
+              <th style="color:#6a5048;font-size:11px;text-transform:uppercase;letter-spacing:.08em;font-weight:600;padding:10px 16px;text-align:left;border-bottom:1px solid #2a1a0f;">Product</th>
+              <th style="color:#6a5048;font-size:11px;text-transform:uppercase;letter-spacing:.08em;font-weight:600;padding:10px 16px;text-align:left;border-bottom:1px solid #2a1a0f;">Category</th>
+              <th style="color:#6a5048;font-size:11px;text-transform:uppercase;letter-spacing:.08em;font-weight:600;padding:10px 16px;text-align:left;border-bottom:1px solid #2a1a0f;">Price</th>
+              <th style="color:#6a5048;font-size:11px;text-transform:uppercase;letter-spacing:.08em;font-weight:600;padding:10px 16px;text-align:left;border-bottom:1px solid #2a1a0f;">Sizes</th>
+            </tr>
+          </thead>
+          <tbody id="products-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const token = localStorage.getItem('nztea_token');
+  if (!token) window.location.href = 'login.html';
+  document.getElementById('admin-email').textContent = localStorage.getItem('nztea_email') || 'Admin';
+
+  function logout() {
+    fetch('/api/auth/logout', { method:'POST', headers:{'Authorization':'Bearer '+token} });
+    localStorage.clear(); window.location.href = 'login.html';
+  }
+
+  function fmt(n) { return '₹' + parseFloat(n || 0).toFixed(2); }
+
+  async function editInvested() {
+    const currentStr = document.getElementById('kpi-invested').textContent.replace(/[^0-9.]/g, '');
+    const amount = prompt("Enter total invested amount (₹):", currentStr || "0");
+    if (amount !== null && !isNaN(amount)) {
+      try {
+        const res = await fetch('/api/settings/invested', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+          body: JSON.stringify({ amount: parseFloat(amount) })
+        });
+        if (res.ok) {
+          const data = await res.json();
+          document.getElementById('kpi-invested').textContent = fmt(data.investedAmount);
+          document.getElementById('kpi-invested-label').textContent = 'Manually set';
+        } else {
+          alert('Failed to update');
+        }
+      } catch (err) {
+        console.error(err);
+        alert("Failed to update");
+      }
+    }
+  }
+
+  const chartDefaults = {
+    plugins: { legend: { labels: { color:'#a08070', font:{ size:11 }, boxWidth:10 } } }
+  };
+
+  async function loadAnalytics() {
+    const [statsRes, productsRes, ordersRes] = await Promise.all([
+      fetch('/api/stats', { headers:{'Authorization':'Bearer '+token} }),
+      fetch('/api/products', { headers:{'Authorization':'Bearer '+token} }),
+      fetch('/api/orders', { headers:{'Authorization':'Bearer '+token} }),
+    ]);
+
+    if (statsRes.status === 401) { window.location.href = 'login.html'; return; }
+
+    const stats = await statsRes.json();
+    const products = await productsRes.json();
+    const orders = await ordersRes.json();
+
+    // KPIs
+    const totalRevenue = stats.totalRevenue || 0;
+    const avgOrderValue = orders.length > 0 ? totalRevenue / orders.length : 0;
+    const delivered = orders.filter(o => o.status === 'Delivered').length;
+    const deliveryRate = orders.length > 0 ? ((delivered / orders.length) * 100).toFixed(0) : 0;
+
+    // Category revenue from products (price * stock difference is not real; use simple view)
+    const catRevenue = {};
+    products.forEach(p => {
+      catRevenue[p.category] = (catRevenue[p.category] || 0) + (p.price * (100 - p.stock_count));
+    });
+    const topCat = Object.entries(catRevenue).sort((a,b) => b[1]-a[1])[0]?.[0] || '—';
+
+    document.getElementById('kpi-revenue').textContent = fmt(totalRevenue);
+    document.getElementById('kpi-avg').textContent = fmt(avgOrderValue);
+    document.getElementById('kpi-delivery').textContent = deliveryRate + '%';
+    document.getElementById('kpi-top-cat').textContent = topCat;
+
+    // Category chart (by number of products)
+    const catCounts = {};
+    products.forEach(p => catCounts[p.category] = (catCounts[p.category] || 0) + 1);
+    const catColors = ['#f59e0b','#60a5fa','#4ade80','#a78bfa','#f87171','#fb923c'];
+    new Chart(document.getElementById('category-chart').getContext('2d'), {
+      type: 'bar',
+      data: {
+        labels: Object.keys(catCounts),
+        datasets: [{
+          label: 'Products',
+          data: Object.values(catCounts),
+          backgroundColor: Object.keys(catCounts).map((_,i) => catColors[i % catColors.length] + '33'),
+          borderColor: Object.keys(catCounts).map((_,i) => catColors[i % catColors.length]),
+          borderWidth: 2, borderRadius: 6,
+        }]
+      },
+      options: {
+        responsive:true, maintainAspectRatio:false,
+        plugins: { ...chartDefaults.plugins },
+        scales: {
+          x: { grid:{ color:'rgba(255,255,255,0.03)' }, ticks:{ color:'#6a5048', font:{size:11} } },
+          y: { grid:{ color:'rgba(255,255,255,0.03)' }, ticks:{ color:'#6a5048', font:{size:11}, stepSize:1 } }
+        }
+      }
+    });
+
+
+
+    // Products table
+    document.getElementById('products-tbody').innerHTML = products.map(p => `
+      <tr style="border-bottom:1px solid #1a0f08">
+        <td style="padding:12px 16px;color:#fff;font-size:13px;">${p.name}</td>
+        <td style="padding:12px 16px;"><span class="badge ${catColorMap[p.category]||''}">${p.category}</span></td>
+        <td style="padding:12px 16px;color:#4ade80;font-weight:600">₹${parseFloat(p.price).toFixed(2)}</td>
+        <td style="padding:12px 16px;color:#fff;font-size:11px;">${(p.sizes||[]).join(', ')}</td>
+      </tr>`).join('');
+  }
+
+  loadAnalytics();
+
+  function toggleSidebar() {
+    document.querySelector('.sidebar').classList.toggle('open');
+    document.getElementById('sidebar-overlay').classList.toggle('show');
+  }
+</script>
+</body>
+</html>

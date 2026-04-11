@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NZ Tea | Seller Login</title>
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' https:; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' http://localhost:3000 https://*.supabase.co; img-src 'self' data: https:;">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..800;1,400..800&family=Manrope:wght@200..800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+  <style>
+    body { font-family: 'Manrope', sans-serif; }
+    h1,h2,h3 { font-family: 'EB Garamond', serif; }
+    .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24; }
+    .bg-tea { background: linear-gradient(135deg, #1a0f08 0%, #2d1810 50%, #0f0805 100%); }
+    .card-glass { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1); }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    .fade-up { animation: fadeUp 0.5s ease forwards; }
+  </style>
+</head>
+<body class="bg-tea min-h-[100dvh] flex items-center justify-center px-4">
+
+  <div class="fixed inset-0 overflow-hidden pointer-events-none">
+    <div class="absolute -top-40 -right-40 w-96 h-96 bg-orange-800/20 rounded-full blur-3xl"></div>
+    <div class="absolute -bottom-40 -left-40 w-96 h-96 bg-amber-900/20 rounded-full blur-3xl"></div>
+  </div>
+
+  <div class="relative w-full max-w-md fade-up">
+    <div class="text-center mb-8">
+      <a href="index.html" class="inline-block">
+        <h1 class="text-4xl font-serif italic text-white tracking-tight">NZ Tea</h1>
+        <p class="text-orange-400/70 text-xs tracking-widest uppercase mt-1">Seller Portal</p>
+      </a>
+    </div>
+
+    <div class="card-glass rounded-2xl p-8 shadow-2xl">
+      <h2 class="text-2xl text-white font-headline mb-1">Welcome back</h2>
+      <p class="text-white/50 text-sm mb-8">Sign in to manage your tea business</p>
+
+      <div id="error-msg" class="hidden bg-red-500/10 border border-red-500/30 text-red-400 text-sm px-4 py-3 rounded-lg mb-6"></div>
+
+      <form id="login-form" class="space-y-5">
+        <div>
+          <label class="block text-white/70 text-xs uppercase tracking-widest mb-2">Email</label>
+          <input id="email" type="email" required autocomplete="email" value="admin@nztea.com" class="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-white/20 focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500/50 transition-all text-sm" />
+        </div>
+        <div>
+          <label class="block text-white/70 text-xs uppercase tracking-widest mb-2">Password</label>
+          <div class="relative">
+            <input id="password" type="password" required autocomplete="current-password" value="admin123" class="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-white/20 focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500/50 transition-all text-sm pr-12" />
+            <button type="button" onclick="togglePassword()" class="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/70 transition-colors">
+              <span class="material-symbols-outlined text-[18px]" id="eye-icon">visibility</span>
+            </button>
+          </div>
+        </div>
+
+        <button type="submit" id="submit-btn" class="w-full bg-orange-700 hover:bg-orange-600 text-white font-semibold py-3 rounded-lg transition-all flex items-center justify-center gap-2 mt-2">
+          <span id="btn-text">Sign In</span>
+          <span id="btn-spinner" class="hidden">
+            <svg class="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+            </svg>
+          </span>
+        </button>
+      </form>
+
+      <div class="mt-6 pt-6 border-t border-white/10 text-center">
+        <p class="text-white/30 text-xs mb-2">Demo Credentials:</p>
+        <p class="text-white/20 text-[10px]">admin@nztea.com / admin123</p>
+      </div>
+
+      <div class="mt-4 text-center">
+        <a href="index.html" class="text-white/40 hover:text-white/70 text-xs transition-colors">← Back to Store</a>
+      </div>
+    </div>
+
+    <p class="text-center text-white/20 text-xs mt-6">© 2024 NZ Tea. All rights reserved.</p>
+  </div>
+
+  <script>
+    // Clear any old service workers that might be causing issues
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(function(registrations) {
+        for(let registration of registrations) {
+          registration.unregister();
+          console.log('Service worker unregistered');
+        }
+      });
+    }
+
+    function showError(message) {
+      const errorMsg = document.getElementById('error-msg');
+      errorMsg.textContent = message;
+      errorMsg.classList.remove('hidden');
+    }
+
+    function hideError() {
+      const errorMsg = document.getElementById('error-msg');
+      errorMsg.classList.add('hidden');
+    }
+
+    function togglePassword() {
+      const pw = document.getElementById('password');
+      const icon = document.getElementById('eye-icon');
+      if (pw.type === 'password') { 
+        pw.type = 'text'; 
+        icon.textContent = 'visibility_off'; 
+      } else { 
+        pw.type = 'password'; 
+        icon.textContent = 'visibility'; 
+      }
+    }
+
+    document.getElementById('login-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const btn = document.getElementById('submit-btn');
+      const btnText = document.getElementById('btn-text');
+      const spinner = document.getElementById('btn-spinner');
+      
+      btn.disabled = true;
+      btnText.textContent = 'Signing in...';
+      spinner.classList.remove('hidden');
+      hideError();
+
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+
+      try {
+        const res = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        });
+
+        const data = await res.json();
+        
+        if (!res.ok) {
+          throw new Error(data.error || 'Login failed');
+        }
+
+        localStorage.setItem('nztea_token', data.token);
+        localStorage.setItem('nztea_email', data.email);
+        
+        window.location.href = 'dash.html';
+        
+      } catch (err) {
+        console.error('Login error:', err);
+        showError(err.message || 'Cannot connect to server. Make sure the server is running: node server.js');
+        
+        btn.disabled = false;
+        btnText.textContent = 'Sign In';
+        spinner.classList.add('hidden');
+      }
+    });
+  </script>
+</body>
+</html>

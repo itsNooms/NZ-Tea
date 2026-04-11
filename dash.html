@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' https:; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' http://localhost:3000 https://*.supabase.co; img-src 'self' data: https:; frame-src 'self';">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NZ Tea | Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..800;1,400..800&family=Manrope:wght@200..800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+  <style>
+    * { font-family: 'Manrope', sans-serif; }
+    h1,h2,h3,h4 { font-family: 'EB Garamond', serif; }
+    .material-symbols-outlined { font-variation-settings: 'FILL' 0,'wght' 300,'GRAD' 0,'opsz' 24; vertical-align: middle; }
+    body { background: #0f0a07; color: #e8e0d8; min-height: 100dvh; }
+    .sidebar { background: #18100a; border-right: 1px solid #2a1a0f; width: 240px; min-height: 100dvh; position: fixed; top: 0; left: 0; z-index: 40; transition: transform 0.3s ease; }
+    .main-content { margin-left: 240px; min-height: 100dvh; }
+    .sidebar-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:39; }
+    .sidebar-overlay.show { display:block; }
+    @media (max-width: 768px) {
+      .sidebar { transform: translateX(-100%); }
+      .sidebar.open { transform: translateX(0); box-shadow: 4px 0 24px rgba(0,0,0,0.6); }
+      .main-content { margin-left: 0; }
+    }
+    .nav-link { display: flex; align-items: center; gap: 12px; padding: 10px 20px; border-radius: 8px; margin: 2px 12px; color: #a08070; font-size: 14px; transition: all 0.2s; cursor: pointer; text-decoration: none; }
+    .nav-link:hover { background: rgba(194,101,42,0.1); color: #e8c8a0; }
+    .nav-link.active { background: rgba(194,101,42,0.15); color: #f0a060; border: 1px solid rgba(194,101,42,0.2); }
+    .stat-card { background: #18100a; border: 1px solid #2a1a0f; border-radius: 12px; padding: 24px; transition: all 0.2s; }
+    .stat-card:hover { border-color: rgba(194,101,42,0.3); transform: translateY(-2px); }
+    .badge { border-radius: 20px; padding: 3px 10px; font-size: 11px; font-weight: 600; }
+    .badge-pending { background: rgba(234,179,8,0.15); color: #f59e0b; }
+    .badge-processing { background: rgba(59,130,246,0.15); color: #60a5fa; }
+    .badge-shipped { background: rgba(139,92,246,0.15); color: #a78bfa; }
+    .badge-delivered { background: rgba(34,197,94,0.15); color: #4ade80; }
+    .badge-cancelled { background: rgba(239,68,68,0.15); color: #f87171; }
+    .badge-unpaid { background: rgba(239,68,68,0.15); color: #f87171; }
+    .badge-paid { background: rgba(34,197,94,0.15); color: #4ade80; }
+    .skeleton { background: linear-gradient(90deg, #2a1a0f 25%, #3a2010 50%, #2a1a0f 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 4px; }
+    @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+    table { width: 100%; border-collapse: collapse; }
+    th { color: #6a5048; font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600; padding: 12px 16px; text-align: left; border-bottom: 1px solid #2a1a0f; }
+    td { padding: 14px 16px; border-bottom: 1px solid #1a0f08; font-size: 13px; color: #c0a890; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: rgba(255,255,255,0.02); }
+    @keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+    .fade-in { animation: fadeIn 0.4s ease forwards; }
+  </style>
+</head>
+<body>
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+<!-- Sidebar -->
+<aside class="sidebar flex flex-col">
+  <div class="p-6 border-b border-[#2a1a0f]">
+    <h1 class="text-2xl font-serif italic text-white tracking-tight">NZ Tea</h1>
+    <p class="text-orange-700/60 text-xs tracking-widest mt-1">SELLER PORTAL</p>
+  </div>
+  <nav class="flex-1 py-4">
+    <a href="dash.html" class="nav-link active">
+      <span class="material-symbols-outlined text-[20px]">dashboard</span> Dashboard
+    </a>
+    <a href="inventory.html" class="nav-link">
+      <span class="material-symbols-outlined text-[20px]">inventory_2</span> Inventory
+    </a>
+    <a href="manage.html" class="nav-link">
+      <span class="material-symbols-outlined text-[20px]">receipt_long</span> Orders
+    </a>
+    <a href="analysis.html" class="nav-link">
+      <span class="material-symbols-outlined text-[20px]">bar_chart</span> Analytics
+    </a>
+  </nav>
+  <div class="p-4 border-t border-[#2a1a0f]">
+    <div class="flex items-center gap-3 mb-3 px-2">
+      <div class="w-8 h-8 bg-orange-800/30 rounded-full flex items-center justify-center">
+        <span class="material-symbols-outlined text-[16px] text-orange-400">person</span>
+      </div>
+      <div>
+        <p class="text-white text-xs font-semibold" id="admin-email">Admin</p>
+        <p class="text-white/30 text-[10px]">Seller Account</p>
+      </div>
+    </div>
+    <button onclick="logout()" class="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-white/40 hover:text-red-400 hover:bg-red-500/10 transition-all text-xs">
+      <span class="material-symbols-outlined text-[16px]">logout</span> Sign Out
+    </button>
+  </div>
+</aside>
+
+<!-- Main -->
+<div class="main-content">
+  <!-- Topbar -->
+  <header class="sticky top-0 z-30 bg-[#0f0a07]/80 backdrop-blur border-b border-[#2a1a0f] px-4 md:px-8 py-4 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <button class="md:hidden text-white/60 hover:text-white flex-shrink-0" onclick="toggleSidebar()">
+        <span class="material-symbols-outlined">menu</span>
+      </button>
+      <div>
+        <h2 class="text-xl text-white font-headline">Dashboard</h2>
+        <p class="text-white/30 text-xs" id="date-display"></p>
+      </div>
+    </div>
+    <div class="flex items-center gap-3">
+      <a href="index.html" target="_blank" class="flex items-center gap-2 text-white/40 hover:text-white/70 text-xs transition-colors border border-white/10 px-3 py-2 rounded-lg">
+        <span class="material-symbols-outlined text-[16px]">open_in_new</span> <span class="hidden sm:inline">View Store</span>
+      </a>
+    </div>
+  </header>
+
+  <div class="p-4 md:p-8 space-y-6 md:space-y-8 fade-in">
+    <!-- Stats Grid -->
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-4">
+      <div class="stat-card">
+        <div class="flex items-center justify-between mb-4">
+          <span class="text-[#6a5048] text-xs uppercase tracking-widest">Revenue</span>
+          <div class="w-8 h-8 bg-green-500/10 rounded-lg flex items-center justify-center">
+            <span class="material-symbols-outlined text-green-400 text-[18px]">payments</span>
+          </div>
+        </div>
+        <p class="text-2xl text-white font-semibold" id="stat-revenue">—</p>
+        <p class="text-[#6a5048] text-xs mt-1">Total earnings</p>
+      </div>
+      <div class="stat-card">
+        <div class="flex items-center justify-between mb-4">
+          <span class="text-[#6a5048] text-xs uppercase tracking-widest">Orders</span>
+          <div class="w-8 h-8 bg-blue-500/10 rounded-lg flex items-center justify-center">
+            <span class="material-symbols-outlined text-blue-400 text-[18px]">receipt_long</span>
+          </div>
+        </div>
+        <p class="text-2xl text-white font-semibold" id="stat-orders">—</p>
+        <p class="text-[#6a5048] text-xs mt-1" id="stat-pending-label">Total orders</p>
+      </div>
+      <div class="stat-card relative group">
+        <div class="flex items-center justify-between mb-4">
+          <span class="text-[#6a5048] text-xs uppercase tracking-widest">Invested</span>
+          <div class="w-8 h-8 bg-amber-500/10 rounded-lg flex items-center justify-center">
+            <span class="material-symbols-outlined text-amber-400 text-[18px]">savings</span>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <p class="text-2xl text-white font-semibold" id="stat-invested">—</p>
+          <button onclick="editInvested()" class="opacity-0 group-hover:opacity-100 focus:opacity-100 text-white/30 hover:text-orange-400 transition-all rounded">
+            <span class="material-symbols-outlined text-[16px]">edit</span>
+          </button>
+        </div>
+        <p class="text-[#6a5048] text-xs mt-1" id="stat-invested-label">Current stock value</p>
+      </div>
+      <div class="stat-card">
+        <div class="flex items-center justify-between mb-4">
+          <span class="text-[#6a5048] text-xs uppercase tracking-widest">Products</span>
+          <div class="w-8 h-8 bg-orange-500/10 rounded-lg flex items-center justify-center">
+            <span class="material-symbols-outlined text-orange-400 text-[18px]">inventory_2</span>
+          </div>
+        </div>
+        <p class="text-2xl text-white font-semibold" id="stat-products">—</p>
+        <p class="text-[#6a5048] text-xs mt-1" id="stat-stock-label">In stock</p>
+      </div>
+      <div class="stat-card">
+        <div class="flex items-center justify-between mb-4">
+          <span class="text-[#6a5048] text-xs uppercase tracking-widest">Customers</span>
+          <div class="w-8 h-8 bg-purple-500/10 rounded-lg flex items-center justify-center">
+            <span class="material-symbols-outlined text-purple-400 text-[18px]">group</span>
+          </div>
+        </div>
+        <p class="text-2xl text-white font-semibold" id="stat-customers">—</p>
+        <p class="text-[#6a5048] text-xs mt-1">Registered</p>
+      </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+      <!-- Order Status Chart -->
+      <div class="stat-card">
+        <h3 class="text-white font-headline text-lg mb-4">Order Status</h3>
+        <div class="relative h-48 flex items-center justify-center">
+          <canvas id="status-chart"></canvas>
+          <div id="no-orders-chart" class="hidden text-white/30 text-sm text-center">No orders yet</div>
+        </div>
+      </div>
+      <!-- Quick Actions -->
+      <div class="stat-card md:col-span-2">
+        <h3 class="text-white font-headline text-lg mb-4">Quick Actions</h3>
+        <div class="grid grid-cols-2 gap-3">
+          <a href="inventory.html" class="flex items-center gap-3 bg-orange-800/10 border border-orange-800/20 rounded-xl p-4 hover:bg-orange-800/20 transition-all group">
+            <span class="material-symbols-outlined text-orange-400 text-[28px]">add_box</span>
+            <div>
+              <p class="text-white text-sm font-medium">Add Product</p>
+              <p class="text-white/40 text-xs">Add new tea to inventory</p>
+            </div>
+          </a>
+          <a href="manage.html" class="flex items-center gap-3 bg-blue-800/10 border border-blue-800/20 rounded-xl p-4 hover:bg-blue-800/20 transition-all group">
+            <span class="material-symbols-outlined text-blue-400 text-[28px]">package_2</span>
+            <div>
+              <p class="text-white text-sm font-medium">Process Orders</p>
+              <p class="text-white/40 text-xs">Update order statuses</p>
+            </div>
+          </a>
+          <a href="analysis.html" class="flex items-center gap-3 bg-green-800/10 border border-green-800/20 rounded-xl p-4 hover:bg-green-800/20 transition-all group">
+            <span class="material-symbols-outlined text-green-400 text-[28px]">trending_up</span>
+            <div>
+              <p class="text-white text-sm font-medium">View Analytics</p>
+              <p class="text-white/40 text-xs">Revenue & insights</p>
+            </div>
+          </a>
+          <a href="index.html" target="_blank" class="flex items-center gap-3 bg-purple-800/10 border border-purple-800/20 rounded-xl p-4 hover:bg-purple-800/20 transition-all group">
+            <span class="material-symbols-outlined text-purple-400 text-[28px]">storefront</span>
+            <div>
+              <p class="text-white text-sm font-medium">View Store</p>
+              <p class="text-white/40 text-xs">See customer view</p>
+            </div>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Low Stock Alert -->
+    <div id="low-stock-section" class="hidden">
+      <div class="bg-yellow-500/5 border border-yellow-500/20 rounded-xl p-4 flex items-start gap-3">
+        <span class="material-symbols-outlined text-yellow-400 mt-0.5">warning</span>
+        <div>
+          <p class="text-yellow-400 font-semibold text-sm">Low Stock Alert</p>
+          <div id="low-stock-list" class="text-yellow-200/60 text-xs mt-1 space-y-1"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Orders -->
+    <div class="stat-card">
+      <div class="flex items-center justify-between mb-6">
+        <h3 class="text-white font-headline text-lg">Recent Orders</h3>
+        <a href="manage.html" class="text-orange-400 text-xs hover:text-orange-300 transition-colors">View All →</a>
+      </div>
+      <div id="orders-table-wrap" class="overflow-x-auto">
+        <table style="width:100%; min-width:600px;">
+          <thead>
+            <tr>
+              <th>Order ID</th>
+              <th>Customer</th>
+              <th>Amount</th>
+              <th>Status</th>
+              <th>Payment</th>
+              <th>Date</th>
+            </tr>
+          </thead>
+          <tbody id="orders-tbody">
+            <tr><td colspan="6" class="text-center text-white/30 py-8">Loading...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function toggleSidebar() {
+    document.querySelector('.sidebar').classList.toggle('open');
+    document.getElementById('sidebar-overlay').classList.toggle('show');
+  }
+
+  const token = localStorage.getItem('nztea_token');
+  if (!token) window.location.href = 'login.html';
+
+  document.getElementById('admin-email').textContent = localStorage.getItem('nztea_email') || 'Admin';
+  document.getElementById('date-display').textContent = new Date().toLocaleDateString('en-US', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+
+  function logout() {
+    fetch('/api/auth/logout', { method: 'POST', headers: { 'Authorization': 'Bearer ' + token } });
+    localStorage.removeItem('nztea_token');
+    localStorage.removeItem('nztea_email');
+    window.location.href = 'login.html';
+  }
+
+  function fmt(n) { return '₹' + parseFloat(n).toFixed(2); }
+  function fmtDate(d) { return new Date(d).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' }); }
+  function statusBadge(s) {
+    const cls = { Pending:'badge-pending', Processing:'badge-processing', Shipped:'badge-shipped', Delivered:'badge-delivered', Cancelled:'badge-cancelled' };
+    return `<span class="badge ${cls[s] || ''}">${s}</span>`;
+  }
+  function payBadge(s) {
+    return `<span class="badge ${s === 'Paid' ? 'badge-paid' : 'badge-unpaid'}">${s}</span>`;
+  }
+
+  async function editInvested() {
+    const currentStr = document.getElementById('stat-invested').textContent.replace(/[^0-9.]/g, '');
+    const amount = prompt("Enter total invested amount (₹):", currentStr || "0");
+    if (amount !== null && !isNaN(amount)) {
+      try {
+        const res = await fetch('/api/settings/invested', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+          body: JSON.stringify({ amount: parseFloat(amount) })
+        });
+        if (res.ok) {
+          const data = await res.json();
+          document.getElementById('stat-invested').textContent = fmt(data.investedAmount);
+          document.getElementById('stat-invested-label').textContent = 'Manually set';
+        } else {
+          alert('Failed to update');
+        }
+      } catch (err) {
+        console.error(err);
+        alert("Failed to update");
+      }
+    }
+  }
+
+  let statusChart = null;
+
+  async function loadDashboard() {
+    try {
+      const res = await fetch('/api/stats', { headers: { 'Authorization': 'Bearer ' + token } });
+      if (res.status === 401) { window.location.href = 'login.html'; return; }
+      const data = await res.json();
+
+      document.getElementById('stat-revenue').textContent = fmt(data.totalRevenue);
+      document.getElementById('stat-invested').textContent = fmt(data.totalInvested || 0);
+      document.getElementById('stat-orders').textContent = data.totalOrders;
+      document.getElementById('stat-pending-label').textContent = `${data.pendingOrders} pending`;
+      document.getElementById('stat-products').textContent = data.totalProducts;
+      document.getElementById('stat-stock-label').textContent = `${data.totalStock} units total`;
+      document.getElementById('stat-customers').textContent = data.totalCustomers;
+
+      // Low stock
+      if (data.lowStockProducts && data.lowStockProducts.length > 0) {
+        document.getElementById('low-stock-section').classList.remove('hidden');
+        document.getElementById('low-stock-list').innerHTML = data.lowStockProducts
+          .map(p => `<p>• ${p.name}: <strong>${p.stock_count}</strong> units left</p>`).join('');
+      }
+
+      // Status chart
+      const statusData = data.statusCounts || {};
+      const labels = Object.keys(statusData);
+      const values = Object.values(statusData);
+      if (labels.length > 0) {
+        const colors = { Pending:'#f59e0b', Processing:'#60a5fa', Shipped:'#a78bfa', Delivered:'#4ade80', Cancelled:'#f87171' };
+        const ctx = document.getElementById('status-chart').getContext('2d');
+        if (statusChart) statusChart.destroy();
+        statusChart = new Chart(ctx, {
+          type: 'doughnut',
+          data: {
+            labels,
+            datasets: [{ data: values, backgroundColor: labels.map(l => colors[l] || '#888'), borderWidth: 2, borderColor: '#18100a', hoverOffset: 4 }]
+          },
+          options: {
+            responsive: true, maintainAspectRatio: false, cutout: '65%',
+            plugins: { legend: { labels: { color: '#a08070', font: { size: 11 }, boxWidth: 10 } } }
+          }
+        });
+      } else {
+        document.getElementById('no-orders-chart').classList.remove('hidden');
+      }
+
+      // Recent orders table
+      const tbody = document.getElementById('orders-tbody');
+      if (!data.recentOrders || data.recentOrders.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" class="text-center text-white/30 py-8">No orders yet</td></tr>';
+      } else {
+        tbody.innerHTML = data.recentOrders.map(o => `
+          <tr>
+            <td class="text-orange-400 font-mono text-xs">#${o.id.slice(0, 8).toUpperCase()}</td>
+            <td>${o.customers?.name || '—'}</td>
+            <td class="text-green-400 font-semibold">${fmt(o.total_amount)}</td>
+            <td>${statusBadge(o.status)}</td>
+            <td>${payBadge(o.payment_status)}</td>
+            <td class="text-white/40">${fmtDate(o.created_at)}</td>
+          </tr>`).join('');
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  loadDashboard();
+</script>
+</body>
+</html>

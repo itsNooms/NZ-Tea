@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NZ Tea | Your Wishlist</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..800;1,400..800&family=Manrope:wght@200..800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: { primary: '#c2652a', background: '#fdfcfb', surface: '#ffffff', 'on-surface': '#1a1c1e', 'on-surface-variant': '#44474e' },
+                    fontFamily: { headline: ['EB Garamond', 'serif'], body: ['Manrope', 'sans-serif'], label: ['Manrope', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-background text-on-surface min-h-screen">
+    <nav class="sticky top-0 w-full z-50 flex justify-between items-center px-6 md:px-12 py-4 md:py-6 bg-black text-white border-b border-stone-800 transition-opacity">
+        <span class="text-2xl font-serif italic cursor-pointer" onclick="window.location.href='index.html'">NZ Tea</span>
+        <div class="flex items-center gap-6">
+            <button onclick="window.location.href='index.html'" class="text-stone-300 hover:text-white transition-colors uppercase tracking-widest text-[10px] font-bold">Back to Shop</button>
+        </div>
+    </nav>
+
+    <main class="container mx-auto px-6 md:px-12 py-12 md:py-20">
+        <header class="mb-12 md:mb-16">
+            <h1 class="text-4xl md:text-6xl font-headline mb-4">Your Wishlist</h1>
+            <p class="text-on-surface-variant font-body text-sm md:text-base" id="wishlist-count">Items you've saved for later.</p>
+        </header>
+
+        <div id="wishlist-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12">
+            <!-- Items injected by JS -->
+        </div>
+
+        <div id="empty-state" class="hidden flex flex-col items-center justify-center py-20 text-center">
+            <span class="material-symbols-outlined text-[64px] md:text-[80px] text-stone-200 mb-6 font-thin">favorite</span>
+            <h2 class="text-2xl font-headline mb-4">Your wishlist is empty</h2>
+            <p class="text-stone-500 mb-8 max-w-sm text-sm">Save your favorite blends while browsing to see them here.</p>
+            <button onclick="window.location.href='index.html'" class="bg-primary text-white px-8 py-3 rounded-lg font-bold hover:bg-orange-600 transition-colors">Start Browsing</button>
+        </div>
+    </main>
+
+    <script>
+        function loadWishlist() {
+            const list = JSON.parse(localStorage.getItem('nztea_wishlist') || '[]');
+            const grid = document.getElementById('wishlist-grid');
+            const empty = document.getElementById('empty-state');
+            const countLabel = document.getElementById('wishlist-count');
+
+            countLabel.textContent = `${list.length} item${list.length === 1 ? '' : 's'} saved for later.`;
+
+            if (list.length === 0) {
+                grid.innerHTML = '';
+                empty.classList.remove('hidden');
+                return;
+            }
+
+            empty.classList.add('hidden');
+            grid.innerHTML = list.map(p => `
+                <div class="group relative bg-white rounded-2xl overflow-hidden border border-stone-100 hover:shadow-xl transition-all duration-500">
+                    <div class="aspect-[4/5] overflow-hidden relative">
+                        <img src="${p.image_url || 'https://images.unsplash.com/photo-1564890369478-c89ca6d9cde9?w=600&q=80'}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+                        <button onclick="removeFromWishlist('${p.id}')" class="absolute top-4 right-4 p-2 bg-black/20 hover:bg-red-500 text-white rounded-full backdrop-blur-md transition-all">
+                            <span class="material-symbols-outlined text-[18px]">close</span>
+                        </button>
+                    </div>
+                    <div class="p-6">
+                        <span class="text-[10px] uppercase tracking-[.2em] text-primary font-bold block mb-2">${p.category}</span>
+                        <h3 class="text-xl font-headline mb-2 clickable cursor-pointer hover:text-primary transition-colors" onclick="window.location.href='product.html?id=${p.id}'">${p.name}</h3>
+                        <p class="text-2xl font-headline font-bold mb-6">₹${parseFloat(p.price).toFixed(2)}</p>
+                        <button onclick="window.location.href='product.html?id=${p.id}'" class="w-full py-3 bg-stone-900 hover:bg-black text-white rounded-xl text-sm font-bold transition-all">View Product</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function removeFromWishlist(id) {
+            let list = JSON.parse(localStorage.getItem('nztea_wishlist') || '[]');
+            list = list.filter(p => p.id !== id);
+            localStorage.setItem('nztea_wishlist', JSON.stringify(list));
+            loadWishlist();
+        }
+
+        window.onload = loadWishlist;
+    </script>
+</body>
+</html>

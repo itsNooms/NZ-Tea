@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NZ Tea | Inventory</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..800;1,400..800&family=Manrope:wght@200..800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+  <style>
+    * { font-family: 'Manrope', sans-serif; }
+    h1,h2,h3,h4 { font-family: 'EB Garamond', serif; }
+    .material-symbols-outlined { font-variation-settings: 'FILL' 0,'wght' 300,'GRAD' 0,'opsz' 24; vertical-align: middle; }
+    body { background: #0f0a07; color: #e8e0d8; min-height: 100dvh; }
+    .sidebar { background:#18100a; border-right:1px solid #2a1a0f; width:240px; min-height:100dvh; position:fixed; top:0; left:0; z-index:40; transition: transform 0.3s ease; }
+    .main-content { margin-left:240px; min-height:100dvh; }
+    .sidebar-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:39; }
+    .sidebar-overlay.show { display:block; }
+    @media (max-width: 768px) {
+      .sidebar { transform: translateX(-100%); }
+      .sidebar.open { transform: translateX(0); box-shadow: 4px 0 24px rgba(0,0,0,0.6); }
+      .main-content { margin-left: 0; }
+    }
+    .nav-link { display:flex; align-items:center; gap:12px; padding:10px 20px; border-radius:8px; margin:2px 12px; color:#a08070; font-size:14px; transition:all 0.2s; cursor:pointer; text-decoration:none; }
+    .nav-link:hover { background:rgba(194,101,42,0.1); color:#e8c8a0; }
+    .nav-link.active { background:rgba(194,101,42,0.15); color:#f0a060; border:1px solid rgba(194,101,42,0.2); }
+    .card { background:#18100a; border:1px solid #2a1a0f; border-radius:12px; }
+    th { color:#6a5048; font-size:11px; text-transform:uppercase; letter-spacing:0.08em; font-weight:600; padding:12px 16px; text-align:left; border-bottom:1px solid #2a1a0f; }
+    td { padding:14px 16px; border-bottom:1px solid #1a0f08; font-size:13px; color:#c0a890; }
+    tr:last-child td { border-bottom:none; }
+    tr:hover td { background:rgba(255,255,255,0.02); }
+    .badge { border-radius:20px; padding:3px 10px; font-size:11px; font-weight:600; }
+    .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.7); backdrop-filter:blur(4px); z-index:100; display:flex; align-items:center; justify-content:center; }
+    .form-input { width:100%; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:8px; padding:10px 14px; color:white; font-size:13px; outline:none; transition:all 0.2s; }
+    .form-input:focus { border-color:rgba(194,101,42,0.6); box-shadow:0 0 0 3px rgba(194,101,42,0.1); }
+    .form-input option { background:#18100a; }
+    @keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+    .fade-in { animation: fadeIn 0.4s ease forwards; }
+    .toast { position:fixed; bottom:24px; right:24px; z-index:200; padding:14px 20px; border-radius:10px; font-size:13px; font-weight:600; display:flex; align-items:center; gap:8px; transform:translateY(100px); opacity:0; transition:all 0.3s ease; }
+    .toast.show { transform:translateY(0); opacity:1; }
+    .toast.success { background:#14532d; border:1px solid #16a34a; color:#4ade80; }
+    .toast.error { background:#450a0a; border:1px solid #dc2626; color:#f87171; }
+  </style>
+</head>
+<body>
+
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
+<div id="toast" class="toast"></div>
+
+<!-- Sidebar -->
+<aside class="sidebar flex flex-col">
+  <div class="p-6 border-b border-[#2a1a0f]">
+    <h1 class="text-2xl font-serif italic text-white tracking-tight">NZ Tea</h1>
+    <p class="text-orange-700/60 text-xs tracking-widest mt-1">SELLER PORTAL</p>
+  </div>
+  <nav class="flex-1 py-4">
+    <a href="dash.html" class="nav-link"><span class="material-symbols-outlined text-[20px]">dashboard</span> Dashboard</a>
+    <a href="inventory.html" class="nav-link active"><span class="material-symbols-outlined text-[20px]">inventory_2</span> Inventory</a>
+    <a href="manage.html" class="nav-link"><span class="material-symbols-outlined text-[20px]">receipt_long</span> Orders</a>
+    <a href="analysis.html" class="nav-link"><span class="material-symbols-outlined text-[20px]">bar_chart</span> Analytics</a>
+  </nav>
+  <div class="p-4 border-t border-[#2a1a0f]">
+    <div class="flex items-center gap-3 mb-3 px-2">
+      <div class="w-8 h-8 bg-orange-800/30 rounded-full flex items-center justify-center">
+        <span class="material-symbols-outlined text-[16px] text-orange-400">person</span>
+      </div>
+      <div>
+        <p class="text-white text-xs font-semibold" id="admin-email">Admin</p>
+        <p class="text-white/30 text-[10px]">Seller Account</p>
+      </div>
+    </div>
+    <button onclick="logout()" class="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-white/40 hover:text-red-400 hover:bg-red-500/10 transition-all text-xs">
+      <span class="material-symbols-outlined text-[16px]">logout</span> Sign Out
+    </button>
+  </div>
+</aside>
+
+<!-- Main -->
+<div class="main-content">
+  <header class="sticky top-0 z-30 bg-[#0f0a07]/80 backdrop-blur border-b border-[#2a1a0f] px-4 md:px-8 py-4 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <button class="md:hidden text-white/60 hover:text-white flex-shrink-0" onclick="toggleSidebar()">
+        <span class="material-symbols-outlined">menu</span>
+      </button>
+      <div>
+        <h2 class="text-xl text-white font-headline">Inventory</h2>
+        <p class="text-white/30 text-xs" id="product-count">Loading products...</p>
+      </div>
+    </div>
+    <button onclick="openModal()" class="flex items-center gap-2 bg-orange-700 hover:bg-orange-600 text-white px-3 md:px-4 py-2 rounded-lg text-sm font-semibold transition-colors">
+      <span class="material-symbols-outlined text-[18px]">add</span> <span class="hidden sm:inline">Add Product</span>
+    </button>
+  </header>
+
+  <div class="p-4 md:p-8 fade-in">
+    <!-- Filter Bar -->
+    <div class="flex flex-wrap items-center gap-2 md:gap-3 mb-6">
+      <div class="relative flex-1 min-w-[140px]">
+        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-white/30 text-[18px]">search</span>
+        <input id="search-input" type="text" placeholder="Search products..."
+          class="form-input pl-9" oninput="renderTable()" />
+      </div>
+      <select id="category-filter" class="form-input flex-1 min-w-[100px]" onchange="renderTable()">
+        <option value="">All Categories</option>
+        <option>Premium</option><option>Black</option><option>Herbal</option>
+        <option>Other</option>
+      </select>
+    </div>
+
+    <!-- Table -->
+    <div class="card overflow-x-auto">
+      <table id="products-table">
+        <thead>
+          <tr>
+            <th>Product</th><th>Category</th><th>Price</th>
+            <th>Sizes</th><th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="products-tbody">
+          <tr><td colspan="5" class="text-center text-white/30 py-10">Loading...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Modal -->
+<div id="modal" class="modal-overlay hidden" onclick="if(event.target===this)closeModal()">
+  <div class="bg-[#18100a] border border-[#2a1a0f] rounded-2xl p-8 w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-2xl" onclick="event.stopPropagation()">
+    <div class="flex items-center justify-between mb-6">
+      <h3 class="text-2xl font-headline text-white" id="modal-title">Add Product</h3>
+      <button onclick="closeModal()" class="text-white/30 hover:text-white/70 transition-colors">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+
+    <form id="product-form" class="space-y-4">
+      <input type="hidden" id="edit-id" />
+      <div>
+        <label class="block text-white/50 text-xs uppercase tracking-widest mb-2">Product Name *</label>
+        <input id="f-name" type="text" required class="form-input" placeholder="e.g. Golden Chamomile" />
+      </div>
+      <div>
+        <label class="block text-white/50 text-xs uppercase tracking-widest mb-2">Description</label>
+        <textarea id="f-desc" rows="3" class="form-input resize-none" placeholder="Short product description..."></textarea>
+      </div>
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="block text-white/50 text-xs uppercase tracking-widest mb-2">Price (₹) *</label>
+          <input id="f-price" type="number" min="0" step="0.01" required class="form-input" placeholder="0.00" />
+        </div>
+        <div>
+          <label class="block text-white/50 text-xs uppercase tracking-widest mb-2">Available Sizes</label>
+          <div class="flex items-center gap-4 mt-2">
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" name="f-size" value="100g" class="w-4 h-4 rounded border-white/10 bg-white/5 shadow-inner" />
+              <span class="text-white/70 text-sm">100g</span>
+            </label>
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" name="f-size" value="250g" class="w-4 h-4 rounded border-white/10 bg-white/5 shadow-inner" />
+              <span class="text-white/70 text-sm">250g</span>
+            </label>
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" name="f-size" value="500g" class="w-4 h-4 rounded border-white/10 bg-white/5 shadow-inner" />
+              <span class="text-white/70 text-sm">500g</span>
+            </label>
+          </div>
+        </div>
+      </div>
+      <div>
+        <label class="block text-white/50 text-xs uppercase tracking-widest mb-2">Category *</label>
+        <select id="f-category" required class="form-input">
+          <option value="">Select category</option>
+          <option>Premium</option><option>Black</option><option>Herbal</option>
+          <option>Other</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-white/50 text-xs uppercase tracking-widest mb-2">Product Image</label>
+        <div class="flex gap-2 items-center">
+            <input id="f-image" type="text" class="form-input flex-1" placeholder="Image URL or choose file..." />
+            <input type="file" id="f-image-file" accept="image/*" class="hidden" onchange="handleFileUpload(event)" />
+            <button type="button" onclick="document.getElementById('f-image-file').click()" class="bg-white/10 hover:bg-white/20 text-white px-4 py-[10px] rounded-lg text-sm transition-colors whitespace-nowrap border border-white/10 flex items-center gap-2">
+                <span class="material-symbols-outlined text-[16px]">upload</span> Upload
+            </button>
+        </div>
+      </div>
+      <div class="flex items-center gap-3">
+        <input id="f-available" type="checkbox" checked class="w-4 h-4 accent-orange-500" />
+        <label class="text-white/70 text-sm">Available</label>
+      </div>
+      <div class="flex gap-3 pt-2">
+        <button type="button" onclick="closeModal()" class="flex-1 py-3 border border-white/10 text-white/60 rounded-lg text-sm hover:bg-white/5 transition-all">Cancel</button>
+        <button type="submit" id="modal-submit" class="flex-1 py-3 bg-orange-700 hover:bg-orange-600 text-white font-semibold rounded-lg text-sm transition-colors">Save Product</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Delete Confirm -->
+<div id="delete-modal" class="modal-overlay hidden">
+  <div class="bg-[#18100a] border border-red-900/30 rounded-2xl p-8 w-full max-w-sm shadow-2xl">
+    <div class="flex items-center gap-4 mb-4">
+      <div class="w-12 h-12 bg-red-500/10 rounded-xl flex items-center justify-center">
+        <span class="material-symbols-outlined text-red-400 text-[28px]">delete</span>
+      </div>
+      <div>
+        <h3 class="text-white font-headline text-xl">Delete Product</h3>
+        <p class="text-white/40 text-xs">This action cannot be undone</p>
+      </div>
+    </div>
+    <p class="text-white/60 text-sm mb-6">Are you sure you want to delete <strong id="delete-name" class="text-white"></strong>?</p>
+    <div class="flex gap-3">
+      <button onclick="closeDeleteModal()" class="flex-1 py-3 border border-white/10 text-white/60 rounded-lg text-sm hover:bg-white/5 transition-all">Cancel</button>
+      <button onclick="confirmDelete()" class="flex-1 py-3 bg-red-700 hover:bg-red-600 text-white font-semibold rounded-lg text-sm transition-colors">Delete</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const token = localStorage.getItem('nztea_token');
+  if (!token) window.location.href = 'login.html';
+  document.getElementById('admin-email').textContent = localStorage.getItem('nztea_email') || 'Admin';
+
+  let products = [];
+  let deleteTarget = null;
+
+  function logout() {
+    fetch('/api/auth/logout', { method:'POST', headers:{'Authorization':'Bearer '+token} });
+    localStorage.clear(); window.location.href = 'login.html';
+  }
+
+  function showToast(msg, type = 'success') {
+    const t = document.getElementById('toast');
+    t.textContent = ''; t.className = 'toast ' + type;
+    t.innerHTML = (type === 'success' ? '✓ ' : '✕ ') + msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3000);
+  }
+
+  async function handleFileUpload(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) { showToast('File size must be under 5MB', 'error'); return; }
+
+    const reader = new FileReader();
+    reader.onload = async (ev) => {
+      const base64 = ev.target.result;
+      const btn = e.target.nextElementSibling;
+      const originalText = btn.innerHTML;
+      btn.innerHTML = '<span class="material-symbols-outlined text-[16px]">hourglass_empty</span>...';
+      btn.disabled = true;
+
+      try {
+        const res = await fetch('/api/upload', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+          body: JSON.stringify({ filename: file.name, base64 })
+        });
+        const data = await res.json();
+        if (res.ok) {
+          document.getElementById('f-image').value = data.url;
+          showToast('Image uploaded successfully');
+        } else {
+          showToast(data.error || 'Upload failed', 'error');
+        }
+      } catch (err) {
+        console.error('Upload Error:', err);
+        showToast('Upload failed: ' + (err.message || 'Server error'), 'error');
+      } finally {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+        e.target.value = '';
+      }
+    };
+    reader.readAsDataURL(file);
+  }
+
+  async function loadProducts() {
+    const res = await fetch('/api/products', { headers:{'Authorization':'Bearer '+token} });
+    if (res.status === 401) { window.location.href = 'login.html'; return; }
+    products = await res.json();
+    document.getElementById('product-count').textContent = `${products.length} products`;
+    renderTable();
+  }
+
+  function renderTable() {
+    const search = document.getElementById('search-input').value.toLowerCase();
+    const cat = document.getElementById('category-filter').value;
+    let filtered = products.filter(p => {
+      if (search && !p.name.toLowerCase().includes(search) && !(p.category||'').toLowerCase().includes(search)) return false;
+      if (cat && p.category !== cat) return false;
+      return true;
+    });
+
+    const tbody = document.getElementById('products-tbody');
+    if (!filtered.length) {
+      tbody.innerHTML = '<tr><td colspan="5" class="text-center text-white/30 py-10">No products found</td></tr>';
+      return;
+    }
+
+    const catColors = { Green:'text-green-400 bg-green-400/10', Black:'text-stone-400 bg-stone-400/10', Herbal:'text-emerald-400 bg-emerald-400/10', Oolong:'text-amber-400 bg-amber-400/10', Matcha:'text-lime-400 bg-lime-400/10', Other:'text-slate-400 bg-slate-400/10' };
+
+    tbody.innerHTML = filtered.map(p => `
+      <tr>
+        <td>
+          <div class="flex items-center gap-3">
+            ${p.image_url ? `<img src="${p.image_url}" class="w-10 h-10 rounded-lg object-cover" onerror="this.style.display='none'" />` : `<div class="w-10 h-10 bg-orange-900/20 rounded-lg flex items-center justify-center"><span class="material-symbols-outlined text-orange-600 text-[16px]">local_florist</span></div>`}
+            <div>
+              <p class="text-white font-medium text-sm">${p.name}</p>
+              <p class="text-white/30 text-xs">${p.description || '—'}</p>
+            </div>
+          </div>
+        </td>
+        <td><span class="badge ${catColors[p.category] || ''}">${p.category}</span></td>
+        <td class="text-green-400 font-semibold">₹${parseFloat(p.price).toFixed(2)}</td>
+        <td>
+          <div class="flex flex-wrap gap-1">
+            ${(p.sizes || []).map(s => `<span class="px-1.5 py-0.5 rounded bg-white/5 text-white/50 text-[10px] font-bold uppercase tracking-wider border border-white/5">${s}</span>`).join('') || '<span class="text-white/20 text-xs italic">No sizes</span>'}
+          </div>
+        </td>
+        <td>
+          <div class="flex items-center gap-2">
+            <button onclick="openModal(${JSON.stringify(p).replace(/"/g, '&quot;')})" class="p-2 rounded-lg hover:bg-orange-500/10 text-orange-400 transition-colors" title="Edit">
+              <span class="material-symbols-outlined text-[18px]">edit</span>
+            </button>
+            <button onclick="openDeleteModal('${p.id}', '${p.name.replace(/'/g, "\\'")}') " class="p-2 rounded-lg hover:bg-red-500/10 text-red-400 transition-colors" title="Delete">
+              <span class="material-symbols-outlined text-[18px]">delete</span>
+            </button>
+          </div>
+        </td>
+      </tr>`).join('');
+  }
+
+  function openModal(product = null) {
+    document.getElementById('modal-title').textContent = product ? 'Edit Product' : 'Add Product';
+    document.getElementById('edit-id').value = product?.id || '';
+    document.getElementById('f-name').value = product?.name || '';
+    document.getElementById('f-desc').value = product?.description || '';
+    document.getElementById('f-price').value = product?.price || '';
+    
+    // Reset and set size checkboxes
+    const sizeChecks = document.querySelectorAll('input[name="f-size"]');
+    sizeChecks.forEach(c => c.checked = product?.sizes?.includes(c.value) || false);
+    document.getElementById('f-available').checked = product ? product.in_stock : true;
+    document.getElementById('f-category').value = product?.category || '';
+    document.getElementById('f-image').value = product?.image_url || '';
+    document.getElementById('modal').classList.remove('hidden');
+  }
+
+  function closeModal() { document.getElementById('modal').classList.add('hidden'); }
+
+  function openDeleteModal(id, name) {
+    deleteTarget = id;
+    document.getElementById('delete-name').textContent = name;
+    document.getElementById('delete-modal').classList.remove('hidden');
+  }
+
+  function closeDeleteModal() {
+    deleteTarget = null;
+    document.getElementById('delete-modal').classList.add('hidden');
+  }
+
+  async function confirmDelete() {
+    if (!deleteTarget) return;
+    const res = await fetch(`/api/products/${deleteTarget}`, { method:'DELETE', headers:{'Authorization':'Bearer '+token} });
+    if (res.ok) { showToast('Product deleted'); closeDeleteModal(); loadProducts(); }
+    else { showToast('Failed to delete product', 'error'); }
+  }
+
+  document.getElementById('product-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const id = document.getElementById('edit-id').value;
+    const selectedSizes = Array.from(document.querySelectorAll('input[name="f-size"]:checked')).map(c => c.value);
+    
+    const body = {
+      name: document.getElementById('f-name').value,
+      description: document.getElementById('f-desc').value,
+      price: parseFloat(document.getElementById('f-price').value),
+      sizes: selectedSizes,
+      category: document.getElementById('f-category').value,
+      image_url: document.getElementById('f-image').value,
+      in_stock: document.getElementById('f-available').checked
+    };
+
+    const url = id ? `/api/products/${id}` : '/api/products';
+    const method = id ? 'PUT' : 'POST';
+    const res = await fetch(url, { method, headers:{'Authorization':'Bearer '+token,'Content-Type':'application/json'}, body: JSON.stringify(body) });
+
+    if (res.ok) {
+      showToast(id ? 'Product updated' : 'Product added');
+      closeModal(); loadProducts();
+    } else {
+      const err = await res.json();
+      showToast(err.error || 'Failed to save product', 'error');
+    }
+  });
+
+  loadProducts();
+
+  function toggleSidebar() {
+    document.querySelector('.sidebar').classList.toggle('open');
+    document.getElementById('sidebar-overlay').classList.toggle('show');
+  }
+</script>
+</body>
+</html>

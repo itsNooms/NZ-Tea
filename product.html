@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NZ Tea | Product</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..800;1,400..800&family=Manrope:wght@200..800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+  <script id="tailwind-config">
+    tailwind.config = {
+      theme: { extend: {
+        colors: {
+          "primary": "#c2652a", "primary-container": "#e08850", "on-primary": "#ffffff",
+          "surface": "#faf5ee", "surface-container": "#f2ece4", "surface-container-low": "#f6f0e8",
+          "on-surface": "#3a302a", "on-surface-variant": "#605850",
+          "outline-variant": "#d8d0c8", "background": "#faf5ee",
+          "secondary": "#78706a", "secondary-container": "#eae2da",
+        },
+        fontFamily: { headline: ["EB Garamond","serif"], body: ["Manrope","sans-serif"], label: ["Manrope","sans-serif"] }
+      }}
+    }
+  </script>
+  <style>
+    .material-symbols-outlined { font-variation-settings:'FILL' 0,'wght' 300,'GRAD' 0,'opsz' 24; }
+    body { font-family:'Manrope',sans-serif; background:#faf5ee; color:#3a302a; }
+    h1,h2,h3,h4 { font-family:'EB Garamond',serif; }
+    .qty-btn { width:36px; height:36px; display:flex; align-items:center; justify-content:center; border-radius:50%; border:1px solid #d8d0c8; cursor:pointer; transition:all .2s; color:#3a302a; font-size:18px; }
+    .qty-btn:hover { background:#f2ece4; border-color:#c2652a; color:#c2652a; }
+    .badge { border-radius:20px; padding:4px 12px; font-size:11px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; }
+    @keyframes fadeUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+    .fade-up { animation:fadeUp .5s ease forwards; }
+    .toast { position:fixed; bottom:24px; right:24px; z-index:200; padding:14px 20px; border-radius:10px; font-size:13px; font-weight:600; background:#1a0f08; color:#f0a060; border:1px solid #c2652a; transform:translateY(100px); opacity:0; transition:all .3s ease; }
+    .toast.show { transform:translateY(0); opacity:1; }
+    #cart-badge { transition:transform .2s; }
+    #cart-badge.pop { transform:scale(1.4); }
+  </style>
+</head>
+<body class="bg-background text-on-surface">
+
+<div id="toast" class="toast"></div>
+
+<!-- Nav -->
+<nav class="sticky top-0 w-full z-50 flex justify-between items-center px-8 lg:px-12 py-5 bg-black shadow-sm border-b border-stone-800">
+  <div class="flex items-center gap-8">
+    <a href="index.html" class="text-2xl font-serif italic text-white tracking-tight">NZ Tea</a>
+    <div class="hidden md:flex gap-6 items-center">
+      <a href="index.html" class="text-stone-400 font-sans text-sm hover:text-orange-400 transition-colors">Shop All</a>
+      <a href="index.html#green" class="text-stone-400 font-sans text-sm hover:text-orange-400 transition-colors">Green</a>
+      <a href="index.html#black" class="text-stone-400 font-sans text-sm hover:text-orange-400 transition-colors">Black</a>
+      <a href="index.html#herbal" class="text-stone-400 font-sans text-sm hover:text-orange-400 transition-colors">Herbal</a>
+    </div>
+  </div>
+  <div class="flex items-center gap-3 md:gap-6">
+    <button onclick="window.location.href='wishlist.html'"
+        class="text-stone-300 hover:text-white transition-colors duration-300 relative" id="wishlist-btn">
+        <span class="material-symbols-outlined text-[20px] md:text-[24px]">favorite</span>
+        <span id="wishlist-badge"
+            class="absolute -top-1 -right-1 bg-red-600 text-white text-[10px] w-4 h-4 flex items-center justify-center rounded-full font-bold transition-transform scale-0">0</span>
+    </button>
+    <button onclick="window.location.href='checkout.html'"
+      class="text-stone-300 hover:text-white transition-colors duration-300 relative" id="cart-btn">
+      <span class="material-symbols-outlined">shopping_bag</span>
+      <span id="cart-badge" class="absolute -top-1 -right-1 bg-[#c2652a] text-white text-[10px] w-4 h-4 flex items-center justify-center rounded-full font-bold">0</span>
+    </button>
+    <a href="login.html" class="text-stone-300 hover:text-white font-sans text-sm border border-stone-700 px-4 py-2 rounded-lg transition-colors">Seller Login</a>
+  </div>
+</nav>
+
+<!-- Breadcrumb -->
+<div class="px-8 lg:px-12 py-4 border-b border-outline-variant/30">
+  <div class="max-w-6xl mx-auto flex items-center gap-2 text-xs text-on-surface-variant">
+    <a href="index.html" class="hover:text-primary transition-colors">Home</a>
+    <span>/</span>
+    <span id="breadcrumb-cat" class="hover:text-primary transition-colors cursor-pointer">—</span>
+    <span>/</span>
+    <span id="breadcrumb-name" class="text-on-surface font-medium">—</span>
+  </div>
+</div>
+
+<!-- Product Section -->
+<main class="max-w-6xl mx-auto px-8 lg:px-12 py-16">
+  <!-- Loading -->
+  <div id="loading-state" class="flex items-center justify-center py-24">
+    <div class="text-center">
+      <div class="w-12 h-12 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+      <p class="text-on-surface-variant text-sm">Loading product...</p>
+    </div>
+  </div>
+
+  <!-- Error -->
+  <div id="error-state" class="hidden text-center py-24">
+    <span class="material-symbols-outlined text-5xl text-on-surface-variant/40 mb-4 block">error_outline</span>
+    <h2 class="text-2xl font-headline mb-2">Product not found</h2>
+    <p class="text-on-surface-variant text-sm mb-6">This product may have been removed or the link is incorrect.</p>
+    <a href="index.html" class="bg-primary text-on-primary px-8 py-3 rounded-lg font-medium inline-block hover:bg-primary-container transition-colors">Back to Shop</a>
+  </div>
+
+  <!-- Product Content -->
+  <div id="product-content" class="hidden fade-up grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
+    <!-- Image -->
+    <div class="lg:sticky lg:top-32 self-start">
+      <div class="aspect-square bg-surface-container rounded-3xl overflow-hidden relative group shadow-2xl">
+        <img id="product-img" src="" alt="" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 will-change-transform" />
+        <div id="product-category-badge" class="absolute top-6 left-6">
+          <span class="badge bg-white/90 backdrop-blur-sm text-primary px-4 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest shadow-sm"></span>
+        </div>
+      </div>
+      <!-- Thumbnails placeholder -->
+      <div class="flex gap-3 mt-4">
+        <div class="w-16 h-16 rounded-lg bg-surface-container overflow-hidden border-2 border-primary cursor-pointer">
+          <img id="thumb-img" src="" class="w-full h-full object-cover" />
+        </div>
+      </div>
+    </div>
+
+    <!-- Details -->
+    <div class="space-y-6 py-2">
+      <div>
+        <span id="detail-category" class="uppercase tracking-[.25em] text-xs font-semibold text-primary block mb-3"></span>
+        <h1 id="detail-name" class="text-5xl font-headline text-on-surface leading-tight mb-3"></h1>
+        <p id="detail-description" class="text-on-surface-variant font-body leading-relaxed"></p>
+      </div>
+
+      <div class="flex items-baseline gap-3 pt-2">
+        <span id="detail-price" class="text-4xl font-headline text-on-surface font-bold"></span>
+        <span id="stock-label" class="text-sm"></span>
+      </div>
+
+      <div class="h-px bg-outline-variant/40"></div>
+
+      <!-- Sizes -->
+      <div id="size-selection" class="hidden">
+        <p class="text-xs uppercase tracking-widest text-on-surface-variant mb-3 font-semibold">Available Sizes</p>
+        <div class="flex gap-2" id="size-chips-container">
+          <!-- Chips injected by JS -->
+        </div>
+      </div>
+
+      <!-- Quantity -->
+      <div>
+        <p class="text-xs uppercase tracking-widest text-on-surface-variant mb-3 font-semibold">Quantity</p>
+        <div class="flex items-center gap-4">
+          <button class="qty-btn" onclick="changeQty(-1)">−</button>
+          <span id="qty-display" class="text-xl font-semibold w-8 text-center">1</span>
+          <button class="qty-btn" onclick="changeQty(1)">+</button>
+        </div>
+      </div>
+
+      <!-- Add to Cart -->
+      <div class="flex gap-3 pt-2">
+        <button id="add-to-cart-btn" onclick="addToCart()"
+          class="flex-1 bg-primary text-on-primary py-4 rounded-xl font-label font-semibold text-sm hover:bg-primary-container transition-all flex items-center justify-center gap-2 shadow-sm">
+          <span class="material-symbols-outlined text-[20px]">shopping_cart</span>
+          Add to Cart
+        </button>
+        <button id="wishlist-toggle" onclick="toggleWishlist()" class="p-4 border border-outline-variant rounded-xl hover:border-red-500 transition-colors" title="Save to Wishlist">
+          <span class="material-symbols-outlined text-on-surface-variant" id="wishlist-icon">favorite_border</span>
+        </button>
+      </div>
+
+
+    </div>
+  </div>
+
+  <!-- Related Products -->
+  <div id="related-section" class="hidden mt-24">
+    <h2 class="text-4xl font-headline mb-10">You May Also Like</h2>
+    <div id="related-grid" class="grid grid-cols-2 md:grid-cols-4 gap-8"></div>
+  </div>
+</main>
+
+<!-- Footer -->
+<footer class="w-full py-12 px-12 bg-stone-100 border-t border-stone-200 mt-16">
+  <div class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+    <span class="font-serif text-xl text-stone-800">NZ Tea</span>
+    <p class="font-sans text-xs text-stone-500">© 2024 NZ Tea. Steeped in simplicity.</p>
+    <a href="index.html" class="text-stone-500 text-xs hover:text-orange-700 transition-colors">← Back to Shop</a>
+  </div>
+</footer>
+
+<script>
+  // Cart from localStorage
+  let cart = JSON.parse(localStorage.getItem('nztea_cart') || '[]');
+  let qty = 1;
+  let currentProduct = null;
+
+  function updateCartBadge() {
+    const total = cart.reduce((s, i) => s + i.quantity, 0);
+    const badge = document.getElementById('cart-badge');
+    if (badge) badge.textContent = total;
+    badge.classList.add('pop');
+    setTimeout(() => badge.classList.remove('pop'), 200);
+  }
+  updateCartBadge();
+
+  function getPriceForSize(basePrice, size) {
+    if (!size || size === '100g') return basePrice;
+    if (size === '250g') return basePrice * 2.56;
+    if (size === '500g') return basePrice * 5.12;
+    return basePrice;
+  }
+
+  function changeQty(delta) {
+    if (!currentProduct) return;
+    qty = Math.max(1, qty + delta);
+    document.getElementById('qty-display').textContent = qty;
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3000);
+  }
+
+  function addToCart() {
+    if (!currentProduct) return;
+    const hasSizes = currentProduct.sizes && currentProduct.sizes.length > 0;
+    if (!hasSizes) { showToast('! Product currently unavailable'); return; }
+
+    const activeChip = document.querySelector('.size-chip.active');
+    const size = activeChip ? activeChip.dataset.size : currentProduct.sizes[0];
+    const scaledPrice = getPriceForSize(currentProduct.price, size);
+    const cartId = `${currentProduct.id}-${size}`;
+
+    const existing = cart.find(i => i.cartId === cartId);
+    if (existing) {
+        existing.quantity += qty;
+    } else {
+        cart.push({ 
+            cartId,
+            id: currentProduct.id, 
+            name: currentProduct.name, 
+            price: scaledPrice, 
+            quantity: qty, 
+            image_url: currentProduct.image_url,
+            size: size
+        });
+    }
+    localStorage.setItem('nztea_cart', JSON.stringify(cart));
+    updateCartBadge();
+    showToast(`✓ ${currentProduct.name} (${size}) added at ₹${(scaledPrice * qty).toFixed(2)}`);
+  }
+
+  async function loadProduct() {
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get('id');
+
+    if (!id) { showError(); return; }
+
+    try {
+      const res = await fetch('/api/products');
+      const products = await res.json();
+      currentProduct = products.find(p => p.id === id);
+
+      if (!currentProduct) { showError(); return; }
+
+      // Fill content
+      document.title = `NZ Tea | ${currentProduct.name}`;
+      document.getElementById('breadcrumb-cat').textContent = currentProduct.category;
+      document.getElementById('breadcrumb-name').textContent = currentProduct.name;
+
+      const img = currentProduct.image_url || 'https://images.unsplash.com/photo-1564890369478-c89ca6d9cde9?w=600&q=80';
+      document.getElementById('product-img').src = img;
+      document.getElementById('product-img').alt = currentProduct.name;
+      document.getElementById('thumb-img').src = img;
+
+      document.getElementById('product-category-badge').querySelector('span').textContent = currentProduct.category;
+      document.getElementById('detail-category').textContent = currentProduct.category;
+      document.getElementById('detail-name').textContent = currentProduct.name;
+      document.getElementById('detail-description').textContent = currentProduct.description || 'A premium artisan tea, carefully sourced and crafted for the discerning palate.';
+      document.getElementById('detail-price').textContent = `₹${parseFloat(currentProduct.price).toFixed(2)}`;
+
+      const hasSizes = currentProduct.sizes && currentProduct.sizes.length > 0;
+      const sizeContainer = document.getElementById('size-chips-container');
+      const sizeWrap = document.getElementById('size-selection');
+
+      if (hasSizes) {
+        sizeWrap.classList.remove('hidden');
+        sizeContainer.innerHTML = currentProduct.sizes.map((s, idx) => `
+          <button data-size="${s}" onclick="
+            this.parentElement.querySelectorAll('.size-chip').forEach(c => c.classList.remove('active', 'bg-orange-600', 'text-white')); 
+            this.classList.add('active', 'bg-orange-600', 'text-white');
+            const scaled = (this.dataset.size === '250g') ? currentProduct.price * 2.56 : (this.dataset.size === '500g' ? currentProduct.price * 5.12 : currentProduct.price);
+            document.getElementById('detail-price').textContent = '₹' + scaled.toFixed(2);
+          " 
+            class="size-chip ${idx === 0 ? 'active bg-orange-600 text-white' : 'bg-surface-container text-on-surface-variant'} px-4 py-2 rounded-xl text-xs font-bold transition-all border border-transparent hover:border-orange-600/30 uppercase tracking-widest">
+            ${s}
+          </button>
+        `).join('');
+      }
+
+      const inStock = hasSizes && currentProduct.in_stock !== false;
+      document.getElementById('stock-label').innerHTML = inStock
+        ? '<span class="text-green-600 font-semibold flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">check_circle</span> Available</span>'
+        : '<span class="text-red-500 font-semibold flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">cancel</span> Currently Unavailable</span>';
+
+      const btn = document.getElementById('add-to-cart-btn');
+      if (!inStock) {
+        btn.disabled = true;
+        btn.className = btn.className.replace('bg-primary hover:bg-primary-container', 'bg-gray-300 cursor-not-allowed');
+        btn.innerHTML = '<span class="material-symbols-outlined text-[20px]">remove_shopping_cart</span> Out of Stock';
+      }
+
+      document.getElementById('loading-state').classList.add('hidden');
+      document.getElementById('product-content').classList.remove('hidden');
+
+      // Related products (same category)
+      const related = products.filter(p => p.id !== currentProduct.id && p.category === currentProduct.category).slice(0, 4);
+      if (related.length > 0) {
+        document.getElementById('related-section').classList.remove('hidden');
+        document.getElementById('related-grid').innerHTML = related.map(p => `
+          <div class="group cursor-pointer" onclick="window.location.href='product.html?id=${p.id}'">
+            <div class="aspect-square bg-surface-container rounded-xl overflow-hidden mb-3 relative">
+              <img src="${p.image_url || ''}" alt="${p.name}"
+                class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                onerror="this.src='https://images.unsplash.com/photo-1564890369478-c89ca6d9cde9?w=300&q=60'" />
+            </div>
+            <h3 class="font-headline text-base group-hover:text-primary transition-colors">${p.name}</h3>
+            <p class="text-xs text-on-surface-variant mb-1">${p.category}</p>
+            <span class="font-semibold text-sm">₹${parseFloat(p.price).toFixed(2)}</span>
+          </div>`).join('');
+      }
+      updateWishlistUI();
+      updateWishlistBadge();
+    } catch (err) {
+      console.error(err);
+      showError();
+    }
+  }
+
+  function showError() {
+    document.getElementById('loading-state').classList.add('hidden');
+    document.getElementById('error-state').classList.remove('hidden');
+  }
+
+  function toggleWishlist() {
+    let list = JSON.parse(localStorage.getItem('nztea_wishlist') || '[]');
+    const idx = list.findIndex(p => p.id === currentProduct.id);
+    if (idx > -1) {
+      list.splice(idx, 1);
+      showToast(`Removed from wishlist`);
+    } else {
+      list.push(currentProduct);
+      showToast(`Added to wishlist`);
+    }
+    localStorage.setItem('nztea_wishlist', JSON.stringify(list));
+    updateWishlistUI();
+    updateWishlistBadge();
+  }
+
+  function updateWishlistUI() {
+    const list = JSON.parse(localStorage.getItem('nztea_wishlist') || '[]');
+    const isFav = list.some(w => w.id === currentProduct.id);
+    const icon = document.getElementById('wishlist-icon');
+    const btn = document.getElementById('wishlist-toggle');
+    if (isFav) {
+      icon.textContent = 'favorite';
+      icon.style.fontVariationSettings = "'FILL' 1";
+      icon.classList.add('text-red-500');
+      btn.classList.add('border-red-500/30', 'bg-red-500/5');
+    } else {
+      icon.textContent = 'favorite_border';
+      icon.style.fontVariationSettings = "'FILL' 0";
+      icon.classList.remove('text-red-500');
+      btn.classList.remove('border-red-500/30', 'bg-red-500/5');
+    }
+  }
+
+  function updateWishlistBadge() {
+    const list = JSON.parse(localStorage.getItem('nztea_wishlist') || '[]');
+    const count = list.length;
+    const b = document.getElementById('wishlist-badge');
+    if (b) {
+      b.textContent = count;
+      b.classList.toggle('scale-0', count === 0);
+      b.classList.toggle('scale-110', count > 0);
+    }
+  }
+
+  // ── Product Parallax ──────────────────────────────────────────────────
+  window.addEventListener('scroll', () => {
+    const img = document.getElementById('product-img');
+    const scrolled = window.pageYOffset;
+    if (img && window.innerWidth > 1024) {
+      // Adjust scroll speed for delicate movement
+      img.style.transform = `scale(1.05) translateY(${scrolled * 0.05}px)`;
+    }
+  });
+
+  loadProduct();
+</script>
+</body>
+</html>
