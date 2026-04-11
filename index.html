@@ -115,10 +115,11 @@
     <!-- TopNavBar Component -->
     <nav
         class="sticky top-0 w-full z-50 flex justify-between items-center px-4 md:px-12 py-4 md:py-6 max-w-screen-2xl mx-auto bg-black dark:bg-black backdrop-blur-sm shadow-sm border-b border-stone-800 transition-opacity">
-            <div class="flex items-center gap-2 cursor-pointer" onclick="window.scrollTo({top:0, behavior:'smooth'})">
-                <img src="images/logo-192.png" alt="Logo" class="w-8 h-8 object-contain">
-                <span class="text-2xl font-serif italic text-white tracking-tight">NZ Tea</span>
-            </div>
+        <div class="flex items-center gap-4 md:gap-8">
+            <span class="text-2xl font-serif italic text-white tracking-tight cursor-pointer"
+                onclick="window.scrollTo({top:0, behavior:'smooth'})">NZ
+                Tea</span>
+        </div>
         <div class="flex items-center gap-3 md:gap-6">
             <div class="relative group hidden sm:block">
                 <input type="text" id="main-search" placeholder="Search tea..." 
@@ -143,8 +144,10 @@
                     class="absolute -top-1 -right-1 bg-primary text-on-primary text-[10px] w-4 h-4 flex items-center justify-center rounded-full font-bold transition-transform">0</span>
             </button>
             <a href="login.html"
-                class="text-stone-300 hover:text-white transition-colors duration-300 font-sans text-xs md:text-sm border border-stone-700 px-3 md:px-4 py-1.5 md:py-2 rounded-lg"><span
-                    class="hidden sm:inline">Seller </span>Login</a>
+                class="flex items-center gap-2 text-stone-300 hover:text-white transition-colors duration-300 font-sans text-xs md:text-sm border border-stone-700 px-3 md:px-4 py-1.5 md:py-2 rounded-lg">
+                <img src="images/logo-192.png" alt="" class="w-4 h-4 object-contain">
+                <span><span class="hidden sm:inline">Seller </span>Login</span>
+            </a>
         </div>
     </nav>
     <div id="main-search-mobile" class="hidden sm:hidden bg-stone-900 border-b border-stone-800 p-4">
