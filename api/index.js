@@ -157,7 +157,7 @@ app.post('/api/upload', requireAuth, (req, res) => {
     const { filename, base64 } = req.body;
     if (!filename || !base64) return res.status(400).json({ error: 'Missing file data' });
 
-    const imagesDir = path.join(process.cwd(), 'images');
+    const imagesDir = path.join(process.cwd(), 'public', 'images');
     if (!fs.existsSync(imagesDir)) fs.mkdirSync(imagesDir);
 
     const matches = base64.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/);
