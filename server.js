@@ -40,10 +40,10 @@ const path = require('path');
 app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
-app.use(express.static(path.join(process.cwd(), 'public')));
+app.use(express.static(process.cwd()));
 
 // Root route
-app.get('/', (req, res) => res.sendFile(path.join(process.cwd(), 'public', 'index.html')));
+app.get('/', (req, res) => res.sendFile(path.join(process.cwd(), 'index.html')));
 
 // Auth middleware
 function requireAuth(req, res, next) {
@@ -152,7 +152,7 @@ app.post('/api/upload', requireAuth, (req, res) => {
     const { filename, base64 } = req.body;
     if (!filename || !base64) return res.status(400).json({ error: 'Missing file data' });
 
-    const imagesDir = path.join(process.cwd(), 'public', 'images');
+    const imagesDir = path.join(process.cwd(), 'images');
     if (!fs.existsSync(imagesDir)) fs.mkdirSync(imagesDir);
 
     const matches = base64.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/);
