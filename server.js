@@ -58,7 +58,7 @@ function requireAuth(req, res, next) {
 app.post('/api/auth/login', (req, res) => {
   const { email, password } = req.body;
   const adminEmail = process.env.ADMIN_EMAIL || 'admin@nztea.com';
-  const adminPassword = process.env.ADMIN_PASSWORD || 'FaizanNZtea';
+  const adminPassword = process.env.ADMIN_PASSWORD || 'FaizanNZTea';
 
   if (email === adminEmail && password === adminPassword) {
     const token = crypto.randomUUID();
