@@ -26,14 +26,16 @@ try {
   console.error('Failed to load settings', e);
 }
 
+const path = require('path');
+
 // Middleware
 app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
-app.use(express.static(__dirname));
+app.use(express.static(process.cwd()));
 
 // Root route
-app.get('/', (req, res) => res.sendFile(__dirname + '/index.html'));
+app.get('/', (req, res) => res.sendFile(path.join(process.cwd(), 'index.html')));
 
 // Auth middleware
 function requireAuth(req, res, next) {
