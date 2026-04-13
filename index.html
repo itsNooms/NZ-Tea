@@ -1,544 +1,127 @@
 <!DOCTYPE html>
-
-<html class="light" lang="en">
+<html lang="en">
 
 <head>
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self' https:; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' http://localhost:3000 https://*.supabase.co; img-src 'self' data: https:; frame-src 'self';">
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>NZ Tea | Premium Assam Teas</title>
-    <link rel="icon" type="image/png" href="images/nz-logo.png">
-    <link rel="apple-touch-icon" href="images/nz-logo.png">
-    <link rel="manifest" href="manifest.json">
-    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="supabase-config.js"></script>
-    <link
-        href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..800;1,400..800&amp;family=Manrope:wght@200..800&amp;display=swap"
-        rel="stylesheet" />
-    <link
-        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
-        rel="stylesheet" />
-    <link
-        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
-        rel="stylesheet" />
-    <script id="tailwind-config">
-        tailwind.config = {
-            darkMode: "class",
-            theme: {
-                extend: {
-                    "colors": {
-                        "outline-variant": "#d8d0c8",
-                        "surface-bright": "#faf5ee",
-                        "error": "#c0392b",
-                        "secondary-fixed-dim": "#cec6be",
-                        "on-primary-fixed-variant": "#8a4518",
-                        "surface-container": "#f2ece4",
-                        "on-primary-fixed": "#401a08",
-                        "outline": "#9a9088",
-                        "on-error-container": "#7a1a10",
-                        "on-error": "#ffffff",
-                        "error-container": "#fce4e0",
-                        "surface-container-lowest": "#ffffff",
-                        "on-tertiary-fixed": "#2e1515",
-                        "on-secondary-fixed": "#2a2420",
-                        "tertiary-fixed-dim": "#e8a0a0",
-                        "secondary": "#78706a",
-                        "on-tertiary": "#ffffff",
-                        "primary-container": "#e08850",
-                        "on-surface-variant": "#605850",
-                        "primary-fixed-dim": "#f0a878",
-                        "surface-tint": "#c2652a",
-                        "on-tertiary-container": "#3a2020",
-                        "on-surface": "#3a302a",
-                        "on-background": "#3a302a",
-                        "surface-dim": "#dcd6cc",
-                        "primary-fixed": "#fbe8d8",
-                        "on-secondary-container": "#605850",
-                        "secondary-fixed": "#eae2da",
-                        "on-primary": "#ffffff",
-                        "surface-container-highest": "#e6e0d6",
-                        "surface-container-high": "#ece6dc",
-                        "on-primary-container": "#fbe8d8",
-                        "tertiary": "#8c3c3c",
-                        "primary": "#c2652a",
-                        "surface-variant": "#ece6dc",
-                        "tertiary-fixed": "#fce0e0",
-                        "on-tertiary-fixed-variant": "#6e3030",
-                        "inverse-surface": "#3a302a",
-                        "background": "#faf5ee",
-                        "inverse-primary": "#f0a878",
-                        "surface-container-low": "#f6f0e8",
-                        "surface": "#faf5ee",
-                        "inverse-on-surface": "#faf5ee",
-                        "on-secondary-fixed-variant": "#504840",
-                        "tertiary-container": "#d47070",
-                        "secondary-container": "#eae2da",
-                        "on-secondary": "#ffffff"
-                    },
-                    "borderRadius": {
-                        "DEFAULT": "0.25rem",
-                        "lg": "0.5rem",
-                        "xl": "0.75rem",
-                        "full": "9999px"
-                    },
-                    "fontFamily": {
-                        "headline": ["EB Garamond", "serif"],
-                        "body": ["Manrope", "sans-serif"],
-                        "label": ["Manrope", "sans-serif"]
-                    }
-                },
-            },
-        }
-    </script>
-    <style>
-        .material-symbols-outlined {
-            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
-        }
-
-        body {
-            font-family: 'Manrope', sans-serif;
-            background-color: #faf5ee;
-            color: #3a302a;
-        }
-
-        h1,
-        h2,
-        h3,
-        h4 {
-            font-family: 'EB Garamond', serif;
-        }
-    </style>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NOOMS Portfolio</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/locomotive-scroll@3.5.4/dist/locomotive-scroll.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="icon" type="image/png" href="logo.png">
 </head>
 
-<body class="bg-background text-on-background selection:bg-primary-fixed selection:text-on-primary-fixed">
-    <!-- TopNavBar Component -->
-    <nav
-        class="sticky top-0 w-full z-50 flex justify-between items-center px-4 md:px-12 py-4 md:py-6 max-w-screen-2xl mx-auto bg-black dark:bg-black backdrop-blur-sm shadow-sm border-b border-stone-800 transition-opacity">
-        <div class="flex items-center gap-4 md:gap-8">
-            <span class="text-2xl font-serif italic text-white tracking-tight cursor-pointer"
-                onclick="window.scrollTo({top:0, behavior:'smooth'})">NZ
-                Tea</span>
+<body>
+    <div id="nav">
+        <h3><b>NOOMS</b>|Portfolio*</h3>
+        <div class="nav-links">
+            <a href="index.html" class="active">Home</a>
+            <a href="skills.html">Skills</a>
+            <a href="projects.html">Projects</a>
         </div>
-        <div class="flex items-center gap-3 md:gap-6">
-            <div class="relative group hidden sm:block">
-                <input type="text" id="main-search" placeholder="Search tea..." 
-                    class="bg-stone-900/50 border border-stone-800 text-white text-xs px-4 py-2 pl-9 rounded-full w-40 focus:w-64 focus:border-primary transition-all duration-300 outline-none"
-                    oninput="handleSearch(this.value)">
-                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-stone-500 text-[18px]">search</span>
-            </div>
-            <button class="sm:hidden text-stone-400" onclick="document.getElementById('main-search-mobile').classList.toggle('hidden')">
-                <span class="material-symbols-outlined">search</span>
-            </button>
-            <button onclick="window.location.href='wishlist.html'"
-                class="text-stone-300 hover:text-white transition-colors duration-300 relative" id="wishlist-btn">
-                <span class="material-symbols-outlined text-[20px] md:text-[24px]">favorite</span>
-                <span id="wishlist-badge"
-                    class="absolute -top-1 -right-1 bg-red-600 text-white text-[10px] w-4 h-4 flex items-center justify-center rounded-full font-bold transition-transform scale-0">0</span>
-            </button>
-            <button onclick="window.location.href='checkout.html'"
-                class="text-stone-300 hover:text-white transition-colors duration-300 relative" id="cart-btn">
-                <span class="material-symbols-outlined text-[20px] md:text-[24px]"
-                    data-icon="shopping_bag">shopping_bag</span>
-                <span id="cart-badge"
-                    class="absolute -top-1 -right-1 bg-primary text-on-primary text-[10px] w-4 h-4 flex items-center justify-center rounded-full font-bold transition-transform">0</span>
-            </button>
-            <a href="login.html"
-                class="flex items-center gap-2 text-stone-300 hover:text-white transition-colors duration-300 font-sans text-xs md:text-sm border border-stone-700 px-3 md:px-4 py-1.5 md:py-2 rounded-lg">
-                <img src="images/nz-logo.png" alt="" class="w-4 h-4 object-contain">
-                <span class="hidden sm:inline">Seller </span>
-            </a>
-        </div>
-    </nav>
-    <div id="main-search-mobile" class="hidden sm:hidden bg-stone-900 border-b border-stone-800 p-4">
-        <input type="text" placeholder="Search tea..." 
-            class="w-full bg-black border border-stone-800 text-white text-sm px-4 py-3 rounded-xl outline-none"
-            oninput="handleSearch(this.value)">
+        <button>Nooman Nasir Khan</button>
     </div>
-    <main>
-        <!-- Hero Section -->
-        <section class="relative min-h-[921px] flex items-center overflow-hidden">
-            <div class="container mx-auto px-12 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center z-10">
-                <div class="max-w-xl">
-                    <span class="uppercase tracking-[0.3em] text-xs font-semibold text-primary mb-6 block">Estates of
-                        Assam</span>
-                    <h1 class="text-7xl lg:text-8xl leading-[0.95] mb-8 font-headline text-on-surface">The Soul of
-                        Assam.</h1>
-                    <p class="text-lg text-on-surface-variant font-body leading-relaxed mb-10 max-w-md">
-                        Discover the bold and malty flavors of our finest Assam teas, hand-plucked from lush, misty
-                        gardens to elevate your daily ritual.
-                    </p>
-                    <div class="flex items-center gap-6">
-                        <button onclick="document.getElementById('products-grid').scrollIntoView({behavior:'smooth'})"
-                            class="bg-primary text-on-primary px-10 py-4 rounded-lg font-label font-medium hover:bg-surface-tint transition-all shadow-sm">Shop
-                            the Collection</button>
-                    </div>
-                </div>
+    <div id="fixed-image">
+        <img src="./img.png" alt="Fixed Image">
+    </div>
+    <div id="main">
+        <div id="page">
+            <div id="loop">
+                <h1><b> WELCOME </b>TO <b><i>MY</i></b> <span>PAGE</span> OF <span><i>CREATIVITY</i></span> <b>AND
+                        INNOVATION. </b></h1>
+                <h1><b> WELCOME </b>TO <b><i>MY</i></b> <span>PAGE</span> OF <span><i>CREATIVITY</i></span> <b>AND
+                        INNOVATION. </b></h1>
+                <h1><b> WELCOME </b>TO <b><i>MY</i></b> <span>PAGE</span> OF <span><i>CREATIVITY</i></span> <b>AND
+                        INNOVATION. </b></h1>
             </div>
-            <div class="absolute inset-0 z-0 overflow-hidden">
-                <div class="absolute inset-0 bg-gradient-to-r from-background via-background/40 to-transparent z-10">
-                </div>
-                <img id="hero-parallax" alt="Assam Tea Garden" class="w-full h-full object-cover object-center scale-110 will-change-transform"
-                    data-alt="Lush green Assam tea garden in the early morning mist with golden sunlight"
-                    src="images/assam_tea_garden.png" />
+            <h3> Hi! <br> Computer Science Engineer with a flair for design and development. I specialize in solving
+                real-world problems through clean code and thoughtful user experience. Enthusiastic, proactive,
+                and driven by leadership—<br>I believe in building solutions that are not just <br>functional, but also
+                elegant and human-centered.</h3>
+            <h4>...SCROLL TO READ</h4>
+        </div>
+        <div id="page1">
+            <div id="right-text">
+                <h1>CS Engineer <br>&nbsp Completed 10th from <br>&nbsp&nbsp&nbsp&nbsp New Central school,
+                    <br>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp 12th from NRI
+                    Junior<br>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp College,
+                    <canvas></canvas>
+                </h1>
             </div>
-        </section>
-        <!-- Featured Collections - Bento Grid -->
-        <section class="py-32 px-12 container mx-auto">
-            <div class="flex justify-between items-end mb-16">
-                <div class="max-w-2xl">
-                    <h2 class="text-5xl font-headline text-on-surface mb-4">Curated Collections.</h2>
-                    <p class="text-on-surface-variant font-body">From the misty heights of Assam to
-                        sun-drenched valleys globally.</p>
-                </div>
-                <a class="text-primary font-label font-bold flex items-center gap-2 group" href="#products-grid">
-                    View All Collections
-                    <span
-                        class="material-symbols-outlined group-hover:translate-x-1 transition-transform">arrow_forward</span>
-                </a>
+            <div id="left-text">
+                <h1>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp Btech from MVGR<br>
+                    &nbsp&nbsp&nbsp&nbsp College Of &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<br>
+                    Engineering.<br> <br>- Vizianagaram</h1>
             </div>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 h-[600px]">
-                <!-- Premium -->
-                <div class="relative group overflow-hidden rounded-xl bg-surface-container-low h-full">
-                    <img alt="Premium Tea"
-                        class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                        data-alt="Close-up of dried organic green tea leaves in a ceramic bowl, vibrant earthy green colors with soft lighting"
-                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuClaHSoPfLun0vpVywQZXyM1bU0NUqkBCo0C_kx8G6ma9zk3ytSF9jMCIg6g434WnG_HlcS7lbEJqp5WCJTjBXggauWZiD2j0fqyERavjskiJlSVT9s1DLGxjyd2_PAhdhSIMP0tW3ZjxvzIw7CmcgsSz499kJ2po3KP7wfTIUOkR2CmPjbl3MpbnW5_O9SRfB7f2Vwj_NFB5hr23uFrGOseLJQV49l0NvtpbznVES2SsAIzAldPHc0GcvJ9nO8IgKXAY_CJtwJF_-r" />
-                    <div class="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors"></div>
-                    <div class="absolute top-0 left-0 bottom-0 p-8 z-10 flex items-end">
-                        <h3 class="text-2xl sm:text-4xl font-headline text-white tracking-widest uppercase"
-                            style="writing-mode: vertical-rl; transform: rotate(180deg);">Premium</h3>
-                    </div>
-                    <div class="absolute bottom-0 right-0 p-8 z-10 text-right">
-                        <button onclick="document.getElementById('premium-section').scrollIntoView({behavior:'smooth'})"
-                            class="bg-white/10 backdrop-blur-md text-white border border-white/30 px-6 py-2 rounded-full font-label text-sm hover:bg-white hover:text-on-surface transition-all">Shop
-                            Collection</button>
-                    </div>
-                </div>
-                <!-- Black -->
-                <div class="relative group overflow-hidden rounded-xl bg-surface-container-low h-full">
-                    <img alt="Black Tea"
-                        class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                        data-alt="Rich dark black tea being poured into a delicate china cup, golden hour lighting with orange and amber tones"
-                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuCdsbwPg12wr2ypE53MPqwRmvjhkXKvrGsT6-4EPCqL6vpqV80Ml9UBNseC_xtjVMLcRhAUFP3bKqQTRhxCl-Ts0Tr5JIB7AL2-ECp_IBixvBxSmCC9wVp07ltEBQguphV-Sj62rIab2hy2ZzCTpDPq2apPSgQkLrI4r6YYXY_sAOi2Vb3Za7vWZ3dG0drZ1cLESXC9diKuz4qtXXfAgY08HxrLadhsEq7tDKiHr6Imh8oejM_jvFRxSPvR1lxHY2bR0ugd1kcv0pUv" />
-                    <div class="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors"></div>
-                    <div class="absolute top-0 left-0 bottom-0 p-8 z-10 flex items-end">
-                        <h3 class="text-2xl sm:text-4xl font-headline text-white tracking-widest uppercase"
-                            style="writing-mode: vertical-rl; transform: rotate(180deg);">Black</h3>
-                    </div>
-                    <div class="absolute bottom-0 right-0 p-8 z-10 text-right">
-                        <button onclick="document.getElementById('black-section').scrollIntoView({behavior:'smooth'})"
-                            class="bg-white/10 backdrop-blur-md text-white border border-white/30 px-6 py-2 rounded-full font-label text-sm hover:bg-white hover:text-on-surface transition-all">Shop
-                            Collection</button>
-                    </div>
-                </div>
-                <!-- Herbal -->
-                <div class="relative group overflow-hidden rounded-xl bg-surface-container-low h-full">
-                    <img alt="Herbal Tea"
-                        class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                        data-alt="Assorted dried flower petals and herbs for tea, including chamomile and lavender, on a light linen cloth"
-                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuCKWHTvE_0UFuqy93uEHwaVS7lglgPYzjWXqYwFdYFpYMMkQcvOOUQricQwNrgRURPCP3IAmPyPdTkMXeC7-5nsIQYw2_K5O7Bi60qa0fBL-Od0JJfi2opmP4uluJBSsEaB9dObUXs3ZQ3NbdOCbLoJYZ2Mh6Vr8-4Loiahb_nlFVSujxeOP_X3VsVxoJiesllHHzFdgYO_Rkw73_HPVZKjODaQnyHJJJ6JB-Iqxn5vcN5K6ZCOM0Lb7Jo-7RXAmwVDYx-vj6vW21dR" />
-                    <div class="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors"></div>
-                    <div class="absolute top-0 left-0 bottom-0 p-8 z-10 flex items-end">
-                        <h3 class="text-2xl sm:text-4xl font-headline text-white tracking-widest uppercase"
-                            style="writing-mode: vertical-rl; transform: rotate(180deg);">Herbal</h3>
-                    </div>
-                    <div class="absolute bottom-0 right-0 p-8 z-10 text-right">
-                        <button onclick="document.getElementById('herbal-section').scrollIntoView({behavior:'smooth'})"
-                            class="bg-white/10 backdrop-blur-md text-white border border-white/30 px-6 py-2 rounded-full font-label text-sm hover:bg-white hover:text-on-surface transition-all">Shop
-                            Collection</button>
-                    </div>
-                </div>
+        </div>
+        <div id="page2">
+            <div id="text1">
+                <h2>HOBBIES</h2>
+                <h1>FUN
+                    <br>
+                    &nbsp&nbsp TIME!!
+                </h1>
             </div>
-        </section>
-        <!-- Product Collections -->
-        <section id="products-grid" class="py-32 px-12 container mx-auto space-y-32">
-            <!-- Premium -->
-            <div id="premium-section" class="grid grid-cols-1 lg:grid-cols-4 gap-12 items-start scroll-mt-24">
-                <div class="lg:col-span-1 pt-4 pr-4 lg:sticky lg:top-32">
-                    <h2 class="text-3xl sm:text-5xl font-headline text-on-surface mb-6 leading-tight">Premium.</h2>
-                    <p class="text-on-surface-variant font-body">Exclusive blends sourced from the finest estates.</p>
-                </div>
-                <div class="lg:col-span-3">
-                    <div id="premium-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-                        <div class="col-span-3 text-center py-10 opacity-50">Loading Premium Collection...</div>
-                    </div>
-                </div>
+            <div id="text2">
+                <h3>ORGANIZING/DECORATING 🧹 &nbsp&nbsp&nbsp&nbsp<br><br> WRITING ✒️
+                    &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<br><br> WATCHING
+                    HORROR GENRE 👻&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<br><br> GARDENING 🌱
+                    &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<br><br> READING 📖
+                    &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<br><br> COOKING 👨‍🍳
+                    &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<br><br> PET CARE 🐱 &nbsp&nbsp&nbsp</h3>
             </div>
-
-            <!-- Black -->
-            <div id="black-section" class="grid grid-cols-1 lg:grid-cols-4 gap-12 items-start scroll-mt-24">
-                <div class="lg:col-span-1 pt-4 pr-4 lg:sticky lg:top-32">
-                    <h2 class="text-5xl font-headline text-on-surface mb-6 leading-tight">Black.</h2>
-                    <p class="text-on-surface-variant font-body">Bold, robust teas for a perfect morning start.</p>
-                </div>
-                <div class="lg:col-span-3">
-                    <div id="black-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-                        <div class="col-span-3 text-center py-10 opacity-50">Loading Black Teas...</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Herbal -->
-            <div id="herbal-section" class="grid grid-cols-1 lg:grid-cols-4 gap-12 items-start scroll-mt-24">
-                <div class="lg:col-span-1 pt-4 pr-4 lg:sticky lg:top-32">
-                    <h2 class="text-5xl font-headline text-on-surface mb-6 leading-tight">Herbal.</h2>
-                    <p class="text-on-surface-variant font-body">Caffeine-free infusions for calm and wellness.</p>
-                </div>
-                <div class="lg:col-span-3">
-                    <div id="herbal-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-                        <div class="col-span-3 text-center py-10 opacity-50">Loading Herbal Teas...</div>
-                    </div>
-                </div>
-            </div>
-        </section>
-    </main>
-    <!-- Footer Component -->
-    <footer
-        class="w-full py-20 px-12 grid grid-cols-1 md:grid-cols-2 lg:flex lg:justify-start lg:gap-32 items-start gap-8 bg-stone-100 dark:bg-stone-900 border-t border-stone-200 dark:border-stone-800">
-        <div class="space-y-4">
-            <span class="font-serif text-xl text-stone-800 dark:text-stone-200">NZ Tea</span>
-            <div class="space-y-2">
-                <p class="font-sans text-xs uppercase tracking-widest text-stone-500 leading-relaxed">
-                    © 2026 NZ Tea. Steeped in simplicity.
-                </p>
-                <div class="pt-2 border-t border-stone-200 dark:border-stone-800">
-                    <p class="font-sans text-[11px] uppercase tracking-wider text-stone-500 leading-tight">
-                        Website build by
-                    </p>
-                    <a href="https://mail.google.com/mail/?view=cm&fs=1&to=mrzainkhan04@gmail.com" target="_blank" class="font-sans text-sm font-bold text-primary hover:text-orange-800 transition-colors block mt-1">
-                        mrzainkhan04@gmail.com
+        </div>
+        <div id="page3">
+            <div id="social-icons-left">
+                <div class="social-vertical">
+                    <a href="https://www.instagram.com/its.nooms_/" target="_blank" class="social-icon"
+                        title="Instagram">
+                        <i class="fab fa-instagram"></i>
                     </a>
-                    <p class="font-sans text-[10px] text-stone-400 mt-1 italic">
-                        Connect for queries
-                    </p>
+                    <a href="https://github.com/itsNooms" target="_blank" class="social-icon" title="GitHub">
+                        <i class="fab fa-github"></i>
+                    </a>
+                    <a href="https://mail.google.com/mail/?view=cm&fs=1&to=mrzainkhan04@gmail.com&su=Portfolio Inquiry&body=Hello Nooman,"
+                        target="_blank" class="social-icon" title="Gmail">
+                        <i class="fas fa-envelope"></i>
+                    </a>
+                    <a href="https://www.snapchat.com/@useraz09/" target="_blank" class="social-icon" title="Snapchat">
+                        <i class="fab fa-snapchat-ghost"></i>
+                    </a>
+                    <a href="https://t.me/yourusername" target="_blank" class="social-icon" title="Telegram">
+                        <i class="fab fa-telegram"></i>
+                    </a>
+                    <a href="https://www.linkedin.com/in/nooman-nasir-khan-07b49a26b/" target="_blank"
+                        class="social-icon" title="LinkedIn">
+                        <i class="fab fa-linkedin"></i>
+                    </a>
+                    <a href="https://docs.google.com/document/d/1mRz3DGORs7CqOtzBnJXyRQOfGzQmsnPIYShWtSEikxY/edit?usp=sharing"
+                        target="_blank" class="social-icon" title="Resume">
+                        <i class="fas fa-file-alt"></i>
+                    </a>
                 </div>
             </div>
+
+            <div id="text3">
+                <h3>CONTACT DETAILS</h3>
+                <h1>LET'S
+                    <br>STAY IN
+                    <br>TOUCH!
+                </h1>
+                <h2>English/Hindi/Urdu/Telugu</h2>
+            </div>
         </div>
-        <div class="flex flex-col gap-4">
-            <span class="font-sans text-[10px] uppercase tracking-widest text-stone-400 font-bold">Shop</span>
-            <a class="text-stone-500 dark:text-stone-400 font-sans text-xs uppercase tracking-widest hover:text-orange-800 underline-offset-4 transition-all"
-                href="#premium-section">Premium</a>
-            <a class="text-stone-500 dark:text-stone-400 font-sans text-xs uppercase tracking-widest hover:text-orange-800 underline-offset-4 transition-all"
-                href="#black-section">Black</a>
-            <a class="text-stone-500 dark:text-stone-400 font-sans text-xs uppercase tracking-widest hover:text-orange-800 underline-offset-4 transition-all"
-                href="#herbal-section">Herbal</a>
-        </div>
-        <div class="flex flex-col gap-4">
-            <span class="font-sans text-[10px] uppercase tracking-widest text-stone-400 font-bold">Support</span>
-            <p class="text-stone-500 dark:text-stone-400 font-sans text-xs uppercase tracking-widest leading-relaxed">
-                Contact: <a href="tel:+917382504704" class="hover:text-orange-800">+91 7382504704</a>
-            </p>
-        </div>
-    </footer>
-
-
-    <script>
-        // ── Cart ──────────────────────────────────────────────────────────────
-        let cart = JSON.parse(localStorage.getItem('nztea_cart') || '[]');
-
-        function updateCartBadge() {
-            const total = cart.reduce((s, i) => s + i.quantity, 0);
-            const badge = document.getElementById('cart-badge');
-            if (badge) badge.textContent = total;
-        }
-        updateCartBadge();
-
-        function getPriceForSize(basePrice, size) {
-            if (!size || size === '100g') return basePrice;
-            if (size === '250g') return basePrice * 2.56;
-            if (size === '500g') return basePrice * 5.12;
-            return basePrice;
-        }
-
-        function quickAdd(product, selectedSize = null) {
-            const size = selectedSize || (product.sizes && product.sizes.length > 0 ? product.sizes[0] : null);
-            const itemPrice = getPriceForSize(product.price, size);
-            const cartId = size ? `${product.id}-${size}` : product.id;
-
-            const existing = cart.find(i => i.cartId === cartId);
-            if (existing) {
-                existing.quantity++;
-            } else {
-                cart.push({
-                    cartId,
-                    id: product.id,
-                    name: product.name,
-                    price: itemPrice,
-                    quantity: 1,
-                    image_url: product.image_url,
-                    size: size
-                });
-            }
-            localStorage.setItem('nztea_cart', JSON.stringify(cart));
-            updateCartBadge();
-            showToast(`✓ ${product.name} ${size ? `(${size})` : ''} added at ₹${itemPrice.toFixed(2)}`);
-        }
-
-        function showToast(msg) {
-            let t = document.getElementById('index-toast');
-            if (!t) {
-                t = document.createElement('div');
-                t.id = 'index-toast';
-                t.style.cssText = 'position:fixed;bottom:24px;right:24px;z-index:999;padding:14px 20px;border-radius:10px;font-size:13px;font-weight:600;background:#1a0f08;color:#f0a060;border:1px solid #c2652a;transform:translateY(100px);opacity:0;transition:all .3s ease;font-family:Manrope,sans-serif';
-                document.body.appendChild(t);
-            }
-            t.textContent = msg;
-            t.style.transform = 'translateY(0)'; t.style.opacity = '1';
-            setTimeout(() => { t.style.transform = 'translateY(100px)'; t.style.opacity = '0'; }, 3000);
-        }
-
-        // ── Load Products ─────────────────────────────────────────────────────
-        const fallbackImages = [
-            'https://lh3.googleusercontent.com/aida-public/AB6AXuAL-ho_bWjKz5tAs0zlBC6T5796njtYpTa3MzjcEheyXyY6EmA4Uvtv11cFAW_B9R2g5kcn6k13L4Hopt2jQsePXnuBeP-v84pU94pjz0I2pz7WpenHCqHFtPx6al3FN7RVPIAJlCrCA9ieoSC1unXU_hiTbTe8tpl4HqVbLg5InE0G_O4RaO6wTOEwCIX6UIID4y18jiCWa_4DRhpNwrMiCFqpyaTFIMQPEJLzDO2Q8KfnGdM9E6aGeUoP8_ezpBidEPtfhisa4HI3',
-            'https://lh3.googleusercontent.com/aida-public/AB6AXuD95Hvi5A1y8Pi1CjIexs6dQMY8HVZsalm37ESsCIUr27pOloUydhummqWfUiJCp_cabV9rH6nfHNjkZJvMbsf-xCXXqrVxUaddmnESM25vRN8SkXv6lI96Q3GidIl4USIxrtRNKCM4NZHjk3WwyaWOncc2hbgZl6dfaSpRDx8Uke_usJ_ctacd9ZyWS4WxwgrVWhcppyn0iRDZbxdcmV7uDPvBgumWVMkCzIwAPuyawQ0K1o-X9kSwGLqPKD7cl1tCuHhrnLX1GEDv',
-            'https://lh3.googleusercontent.com/aida-public/AB6AXuDkyv8OUkKhmwjioxd9T7bXtNinm8HsTVBnxRX6pJ26tFiWBogYQnGL6QrVZJsBOvuQo6uBeETkEyl_LOm74-Xcu5Kb535I7nnJneONvFz4FtDneKWLQsFujPnVzdNR92l63-VnXVUYZNmi--GuuPIJWaEWEjTqCJCeUMvIJRW0p5XpieBDKb5Fxe7XCqGGRj0Nron6IVE-T7lw7VNPqcy1gruIVshN9Qs7zcqHJGYgnFV0Gk4uKQocyO2M2QZmj5rRPp8ciK4lW8de',
-            'https://lh3.googleusercontent.com/aida-public/AB6AXuCx_x-YPIRPJvUwkkYDiPB1L7dKaBsEXkwXemhb0CT2mFAQO6eQdSPdCbPE0QAtH5C3jhMIdEfflrHK4lMk5t26zoY3X51hvgvAADdThEeqIVsIgqpNkD6UAupbsMseGkwLH3q-hV3KMnYFOUEuIjJqIz2Jsu-1BZMFH3By8xQAo5E_j1XXByosa6ilQ906WqTBH8X_sMWytnBE9Kb7YfLY1mWIEj1CnAcU4lYuG4jEPzkX1ZEC-L73LEKZ11kv_NOsYc4HGwvu-kIP'
-        ];
-
-        function renderProductCard(p, i) {
-            const img = p.image_url || fallbackImages[i % fallbackImages.length];
-            const hasSizes = p.sizes && p.sizes.length > 0;
-            // A product is in stock IF it has sizes AND it's not explicitly marked as out of stock (false)
-            const inStock = hasSizes && p.in_stock !== false; 
-
-            return `
-            <div id="product-${p.id}" class="group cursor-pointer" onclick="window.location.href='product.html?id=${p.id}'" data-sizes='${JSON.stringify(p.sizes || [])}' data-base-price="${p.price}">
-                <div class="aspect-[1/1.2] bg-surface-container-low rounded-xl overflow-hidden mb-6 relative">
-                    <img alt="${p.name}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" src="${img}" onerror="this.src='${fallbackImages[0]}'" />
-                    <button onclick="event.stopPropagation(); toggleWishlist(${JSON.stringify(p).replace(/"/g, '&quot;')})" 
-                        class="absolute top-4 left-4 p-2 bg-white/20 backdrop-blur-md rounded-full text-white hover:text-red-500 hover:bg-white transition-all z-20">
-                        <span class="material-symbols-outlined text-[20px] ${JSON.parse(localStorage.getItem('nztea_wishlist') || '[]').some(w => w.id === p.id) ? 'fill-1 text-red-500' : ''}">favorite</span>
-                    </button>
-                    ${!inStock ? '<div class="absolute top-4 right-4"><span class="bg-black/60 text-white text-[10px] uppercase tracking-widest font-bold px-3 py-1 rounded-full">Sold Out</span></div>' : ''}
-                    
-                    <button onclick="event.stopPropagation(); const card = this.closest('[id^=product-]'); const activeSize = card.querySelector('.size-chip.active')?.dataset.size; quickAdd(${JSON.stringify(p).replace(/"/g, '&quot;')}, activeSize)" ${!inStock ? 'disabled' : ''}
-                        class="absolute bottom-4 left-4 right-4 ${inStock ? 'bg-white/90 hover:bg-white text-on-surface' : 'bg-black/50 text-white/50 cursor-not-allowed'} backdrop-blur-sm py-3 rounded-lg font-label text-sm font-bold opacity-0 translate-y-4 group-hover:opacity-100 group-hover:translate-y-0 transition-all">
-                        ${inStock ? 'Quick Add' : 'Out of Stock'}
-                    </button>
-                </div>
-                <h3 class="font-headline text-xl mb-1 group-hover:text-primary transition-colors">${p.name}</h3>
-                <p class="text-sm text-on-surface-variant mb-3 font-body">${p.description || p.category}</p>
-                
-                <div class="flex flex-col gap-4">
-                    ${hasSizes ? `
-                    <div class="flex gap-2" onclick="event.stopPropagation()">
-                        ${p.sizes.map((s, idx) => `
-                            <button data-size="${s}" onclick="
-                                this.parentElement.querySelectorAll('.size-chip').forEach(c => c.classList.remove('active', 'bg-orange-600', 'text-white')); 
-                                this.classList.add('active', 'bg-orange-600', 'text-white');
-                                const card = this.closest('[id^=product-]');
-                                const basePrice = parseFloat(card.dataset.basePrice);
-                                const newPrice = (s === '100g') ? basePrice : (s === '250g' ? basePrice * 2.56 : basePrice * 5.12);
-                                card.querySelector('.price-display').textContent = '₹' + newPrice.toFixed(2);
-                            " 
-                                class="size-chip ${idx === 0 ? 'active bg-orange-600 text-white' : 'bg-surface-container text-on-surface-variant'} px-3 py-1.5 rounded-md text-[10px] font-bold transition-all border border-transparent hover:border-orange-600/30 uppercase tracking-widest">
-                                ${s}
-                            </button>
-                        `).join('')}
-                    </div>` : ''}
-                    
-                    <div class="flex items-center justify-between">
-                        <span class="font-label font-bold text-on-surface price-display">₹${parseFloat(p.price).toFixed(2)}</span>
-                    </div>
-                </div>
-            </div>`;
-        }
-
-        let allProducts = [];
-
-        async function loadProducts() {
-            try {
-                const { data, error } = await supabase.from('products').select('*').order('created_at', { ascending: false });
-                if (error) throw error;
-                allProducts = data;
-                renderFilteredProducts(allProducts);
-            } catch (err) {
-                console.error("Failed to load products:", err);
-            }
-        }
-
-        function renderFilteredProducts(products) {
-            const gPremium = document.getElementById('premium-grid');
-            const gBlack = document.getElementById('black-grid');
-            const gHerbal = document.getElementById('herbal-grid');
-
-            const pPremium = products.filter(p => !p.category || ['premium', 'green', 'matcha'].includes(p.category.toLowerCase()));
-            const pBlack = products.filter(p => p.category && ['black', 'oolong'].includes(p.category.toLowerCase()));
-            const pHerbal = products.filter(p => p.category && p.category.toLowerCase() === 'herbal');
-
-            if (gPremium) gPremium.innerHTML = pPremium.length ? pPremium.map(renderProductCard).join('') : '<p class="col-span-3 py-10 text-stone-500 text-sm">No matches in premium.</p>';
-            if (gBlack) gBlack.innerHTML = pBlack.length ? pBlack.map(renderProductCard).join('') : '<p class="col-span-3 py-10 text-stone-500 text-sm">No matches in black tea.</p>';
-            if (gHerbal) gHerbal.innerHTML = pHerbal.length ? pHerbal.map(renderProductCard).join('') : '<p class="col-span-3 py-10 text-stone-500 text-sm">No matches in herbal.</p>';
-        }
-
-        function handleSearch(query) {
-            const q = (query || "").toLowerCase();
-            const filtered = allProducts.filter(p => 
-                (p.name || "").toLowerCase().includes(q) || 
-                (p.description || "").toLowerCase().includes(q) ||
-                (p.category || "").toLowerCase().includes(q)
-            );
-            renderFilteredProducts(filtered);
-        }
-
-        // ── Parallax ──────────────────────────────────────────────────────────
-        window.addEventListener('scroll', () => {
-            const heroImg = document.getElementById('hero-parallax');
-            if (heroImg) {
-                const scrolled = window.pageYOffset;
-                // Subtle upward movement
-                heroImg.style.transform = `scale(1.1) translateY(-${scrolled * 0.15}px)`;
-            }
-        });
-
-        function toggleWishlist(product) {
-            let list = JSON.parse(localStorage.getItem('nztea_wishlist') || '[]');
-            const idx = list.findIndex(p => p.id === product.id);
-            if (idx > -1) {
-                list.splice(idx, 1);
-                showToast(`Removed ${product.name} from wishlist`);
-            } else {
-                list.push(product);
-                showToast(`Added ${product.name} to wishlist`);
-            }
-            localStorage.setItem('nztea_wishlist', JSON.stringify(list));
-            updateWishlistBadge();
-            renderFilteredProducts(allProducts); // Refresh to show filled/empty hearts
-        }
-
-        function updateWishlistBadge() {
-            const count = JSON.parse(localStorage.getItem('nztea_wishlist') || '[]').length;
-            const b = document.getElementById('wishlist-badge');
-            if (b) {
-                b.textContent = count;
-                b.classList.toggle('scale-0', count === 0);
-                b.classList.toggle('scale-110', count > 0);
-            }
-        }
-        updateWishlistBadge();
-
-        loadProducts();
-
-        // ── PWA / Service Worker (Optional - remove if causing issues) ──
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                // Unregister any existing service workers first to clear issues
-                navigator.serviceWorker.getRegistrations().then(function (registrations) {
-                    for (let registration of registrations) {
-                        registration.unregister();
-                        console.log('Service worker unregistered');
-                    }
-                });
-
-                // Optional: Register new one only if you want PWA features
-                // navigator.serviceWorker.register('sw.js').catch(err => {
-                //   console.log('Service worker registration failed:', err);
-                // });
-            });
-        }
-
-    </script>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/locomotive-scroll@3.5.4/dist/locomotive-scroll.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.5/gsap.min.js"
+        integrity="sha512-cOH8ndwGgPo+K7pTvMrqYbmI8u8k6Sho3js0gOqVWTmQMlLIi6TbqGWRTpf1ga8ci9H3iPsvDLr4X7xwhC/+DQ=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.5/ScrollTrigger.min.js"
+        integrity="sha512-AMl4wfwAmDM1lsQvVBBRHYENn1FR8cfOTpt8QVbb/P55mYOdahHD4LmHM1W55pNe3j/3od8ELzPf/8eNkkjISQ=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="script.js"></script>
+    <script src="water-effect.js"></script>
 </body>
 
 </html>
