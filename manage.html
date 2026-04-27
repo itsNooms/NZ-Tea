@@ -8,228 +8,471 @@
   <link rel="apple-touch-icon" href="images/nz-logo.png">
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#000000">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Supabase JS Library -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="supabase-config.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..800;1,400..800&family=Manrope:wght@200..800&display=swap" rel="stylesheet" />
-  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Supabase JS Library -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
+  <link
+    href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..800;1,400..800&family=Manrope:wght@200..800&display=swap"
+    rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+    rel="stylesheet" />
   <style>
-    * { font-family: 'Manrope', sans-serif; }
-    h1,h2,h3 { font-family: 'EB Garamond', serif; }
-    .material-symbols-outlined { font-variation-settings: 'FILL' 0,'wght' 300,'GRAD' 0,'opsz' 24; vertical-align: middle; }
-    body { background: #0f0a07; color: #e8e0d8; min-height: 100dvh; }
-    .sidebar { background:#18100a; border-right:1px solid #2a1a0f; width:240px; min-height:100dvh; position:fixed; top:0; left:0; z-index:40; transition: transform 0.3s ease; }
-    .main-content { margin-left:240px; min-height:100dvh; }
-    .sidebar-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:39; }
-    .sidebar-overlay.show { display:block; }
-    @media (max-width: 768px) {
-      .sidebar { transform: translateX(-100%); }
-      .sidebar.open { transform: translateX(0); box-shadow: 4px 0 24px rgba(0,0,0,0.6); }
-      .main-content { margin-left: 0; }
+    * {
+      font-family: 'Manrope', sans-serif;
     }
-    .nav-link { display:flex; align-items:center; gap:12px; padding:10px 20px; border-radius:8px; margin:2px 12px; color:#a08070; font-size:14px; transition:all 0.2s; text-decoration:none; }
-    .nav-link:hover { background:rgba(194,101,42,0.1); color:#e8c8a0; }
-    .nav-link.active { background:rgba(194,101,42,0.15); color:#f0a060; border:1px solid rgba(194,101,42,0.2); }
-    .card { background:#18100a; border:1px solid #2a1a0f; border-radius:12px; }
-    th { color:#6a5048; font-size:11px; text-transform:uppercase; letter-spacing:0.08em; font-weight:600; padding:12px 16px; text-align:left; border-bottom:1px solid #2a1a0f; }
-    td { padding:14px 16px; border-bottom:1px solid #1a0f08; font-size:13px; color:#c0a890; }
-    tr:last-child td { border-bottom:none; }
-    tr:hover td { background:rgba(255,255,255,0.02); }
-    .badge { border-radius:20px; padding:3px 10px; font-size:11px; font-weight:600; display:inline-block; }
-    .badge-pending { background: rgba(234,179,8,0.15); color:#f59e0b; }
-    .badge-processing { background:rgba(59,130,246,0.15); color:#60a5fa; }
-    .badge-shipped { background:rgba(139,92,246,0.15); color:#a78bfa; }
-    .badge-delivered { background:rgba(34,197,94,0.15); color:#4ade80; }
-    .badge-cancelled { background:rgba(239,68,68,0.15); color:#f87171; }
-    .badge-unpaid { background:rgba(239,68,68,0.15); color:#f87171; }
-    .badge-paid { background:rgba(34,197,94,0.15); color:#4ade80; }
-    .badge-refunded { background:rgba(139,92,246,0.15); color:#a78bfa; }
-    select.status-select { background:transparent; border:none; outline:none; color:inherit; cursor:pointer; font-size:13px; }
-    .form-input { background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:8px; padding:10px 14px; color:white; font-size:13px; outline:none; transition:all 0.2s; }
-    .form-input:focus { border-color:rgba(194,101,42,0.6); }
-    .form-input option { background:#18100a; }
-    .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.7); backdrop-filter:blur(4px); z-index:100; display:flex; align-items:center; justify-content:center; }
-    @keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
-    .fade-in { animation: fadeIn 0.4s ease forwards; }
-    .toast { position:fixed; bottom:24px; right:24px; z-index:200; padding:14px 20px; border-radius:10px; font-size:13px; font-weight:600; display:flex; align-items:center; gap:8px; transform:translateY(100px); opacity:0; transition:all 0.3s ease; }
-    .toast.show { transform:translateY(0); opacity:1; }
-    .toast.success { background:#14532d; border:1px solid #16a34a; color:#4ade80; }
-    .toast.error { background:#450a0a; border:1px solid #dc2626; color:#f87171; }
+
+    h1,
+    h2,
+    h3 {
+      font-family: 'EB Garamond', serif;
+    }
+
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+      vertical-align: middle;
+    }
+
+    body {
+      background: #0f0a07;
+      color: #e8e0d8;
+      min-height: 100dvh;
+    }
+
+    .sidebar {
+      background: #18100a;
+      border-right: 1px solid #2a1a0f;
+      width: 240px;
+      min-height: 100dvh;
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 40;
+      transition: transform 0.3s ease;
+    }
+
+    .main-content {
+      margin-left: 240px;
+      min-height: 100dvh;
+    }
+
+    .sidebar-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.6);
+      z-index: 39;
+    }
+
+    .sidebar-overlay.show {
+      display: block;
+    }
+
+    @media (max-width: 768px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+
+      .sidebar.open {
+        transform: translateX(0);
+        box-shadow: 4px 0 24px rgba(0, 0, 0, 0.6);
+      }
+
+      .main-content {
+        margin-left: 0;
+      }
+    }
+
+    .nav-link {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 20px;
+      border-radius: 8px;
+      margin: 2px 12px;
+      color: #a08070;
+      font-size: 14px;
+      transition: all 0.2s;
+      text-decoration: none;
+    }
+
+    .nav-link:hover {
+      background: rgba(194, 101, 42, 0.1);
+      color: #e8c8a0;
+    }
+
+    .nav-link.active {
+      background: rgba(194, 101, 42, 0.15);
+      color: #f0a060;
+      border: 1px solid rgba(194, 101, 42, 0.2);
+    }
+
+    .card {
+      background: #18100a;
+      border: 1px solid #2a1a0f;
+      border-radius: 12px;
+    }
+
+    th {
+      color: #6a5048;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-weight: 600;
+      padding: 12px 16px;
+      text-align: left;
+      border-bottom: 1px solid #2a1a0f;
+    }
+
+    td {
+      padding: 14px 16px;
+      border-bottom: 1px solid #1a0f08;
+      font-size: 13px;
+      color: #c0a890;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    tr:hover td {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .badge {
+      border-radius: 20px;
+      padding: 3px 10px;
+      font-size: 11px;
+      font-weight: 600;
+      display: inline-block;
+    }
+
+    .badge-pending {
+      background: rgba(234, 179, 8, 0.15);
+      color: #f59e0b;
+    }
+
+    .badge-processing {
+      background: rgba(59, 130, 246, 0.15);
+      color: #60a5fa;
+    }
+
+    .badge-shipped {
+      background: rgba(139, 92, 246, 0.15);
+      color: #a78bfa;
+    }
+
+    .badge-delivered {
+      background: rgba(34, 197, 94, 0.15);
+      color: #4ade80;
+    }
+
+    .badge-cancelled {
+      background: rgba(239, 68, 68, 0.15);
+      color: #f87171;
+    }
+
+    .badge-unpaid {
+      background: rgba(239, 68, 68, 0.15);
+      color: #f87171;
+    }
+
+    .badge-paid {
+      background: rgba(34, 197, 94, 0.15);
+      color: #4ade80;
+    }
+
+    .badge-refunded {
+      background: rgba(139, 92, 246, 0.15);
+      color: #a78bfa;
+    }
+
+    select.status-select {
+      background: transparent;
+      border: none;
+      outline: none;
+      color: inherit;
+      cursor: pointer;
+      font-size: 13px;
+    }
+
+    .form-input {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      padding: 10px 14px;
+      color: white;
+      font-size: 13px;
+      outline: none;
+      transition: all 0.2s;
+    }
+
+    .form-input:focus {
+      border-color: rgba(194, 101, 42, 0.6);
+    }
+
+    .form-input option {
+      background: #18100a;
+    }
+
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(4px);
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(8px)
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0)
+      }
+    }
+
+    .fade-in {
+      animation: fadeIn 0.4s ease forwards;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 200;
+      padding: 14px 20px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transform: translateY(100px);
+      opacity: 0;
+      transition: all 0.3s ease;
+    }
+
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    .toast.success {
+      background: #14532d;
+      border: 1px solid #16a34a;
+      color: #4ade80;
+    }
+
+    .toast.error {
+      background: #450a0a;
+      border: 1px solid #dc2626;
+      color: #f87171;
+    }
   </style>
 </head>
+
 <body>
-<div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
-<div id="toast" class="toast"></div>
+  <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
+  <div id="toast" class="toast"></div>
 
-<!-- Sidebar -->
-<aside class="sidebar flex flex-col">
-  <div class="p-6 border-b border-[#2a1a0f] flex items-center gap-3">
-    <img src="images/logo-192.png" alt="Logo" class="w-8 h-8">
-    <div>
-      <h1 class="text-2xl font-serif italic text-white tracking-tight leading-none">NZ Tea</h1>
-      <p class="text-orange-700/60 text-[10px] tracking-widest mt-1">SELLER PORTAL</p>
-    </div>
-  </div>
-  <nav class="flex-1 py-4">
-    <a href="dash.html" class="nav-link"><span class="material-symbols-outlined text-[20px]">dashboard</span> Dashboard</a>
-    <a href="inventory.html" class="nav-link"><span class="material-symbols-outlined text-[20px]">inventory_2</span> Inventory</a>
-    <a href="manage.html" class="nav-link active"><span class="material-symbols-outlined text-[20px]">receipt_long</span> Orders</a>
-    <a href="analysis.html" class="nav-link"><span class="material-symbols-outlined text-[20px]">bar_chart</span> Analytics</a>
-  </nav>
-  <div class="p-4 border-t border-[#2a1a0f]">
-    <div class="flex items-center gap-3 mb-3 px-2">
-      <div class="w-8 h-8 bg-orange-800/30 rounded-full flex items-center justify-center">
-        <span class="material-symbols-outlined text-[16px] text-orange-400">person</span>
-      </div>
+  <!-- Sidebar -->
+  <aside class="sidebar flex flex-col">
+    <div class="p-6 border-b border-[#2a1a0f] flex items-center gap-3">
+      <img src="images/nz-logo.png" alt="Logo" class="w-8 h-8">
       <div>
-        <p class="text-white text-xs font-semibold" id="admin-email">Admin</p>
-        <p class="text-white/30 text-[10px]">Seller Account</p>
+        <h1 class="text-2xl font-serif italic text-white tracking-tight leading-none">NZ Tea</h1>
+        <p class="text-orange-700/60 text-[10px] tracking-widest mt-1">SELLER PORTAL</p>
       </div>
     </div>
-    <button onclick="logout()" class="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-white/40 hover:text-red-400 hover:bg-red-500/10 transition-all text-xs">
-      <span class="material-symbols-outlined text-[16px]">logout</span> Sign Out
-    </button>
-  </div>
-</aside>
-
-<!-- Main -->
-<div class="main-content">
-  <header class="sticky top-0 z-30 bg-[#0f0a07]/80 backdrop-blur border-b border-[#2a1a0f] px-4 md:px-8 py-4 flex items-center justify-between">
-    <div class="flex items-center gap-3">
-      <button class="md:hidden text-white/60 hover:text-white flex-shrink-0" onclick="toggleSidebar()">
-        <span class="material-symbols-outlined">menu</span>
+    <nav class="flex-1 py-4">
+      <a href="dash.html" class="nav-link"><span class="material-symbols-outlined text-[20px]">dashboard</span>
+        Dashboard</a>
+      <a href="inventory.html" class="nav-link"><span class="material-symbols-outlined text-[20px]">inventory_2</span>
+        Inventory</a>
+      <a href="manage.html" class="nav-link active"><span
+          class="material-symbols-outlined text-[20px]">receipt_long</span> Orders</a>
+      <a href="analysis.html" class="nav-link"><span class="material-symbols-outlined text-[20px]">bar_chart</span>
+        Analytics</a>
+    </nav>
+    <div class="p-4 border-t border-[#2a1a0f]">
+      <div class="flex items-center gap-3 mb-3 px-2">
+        <div class="w-8 h-8 bg-orange-800/30 rounded-full flex items-center justify-center">
+          <span class="material-symbols-outlined text-[16px] text-orange-400">person</span>
+        </div>
+        <div>
+          <p class="text-white text-xs font-semibold" id="admin-email">Admin</p>
+          <p class="text-white/30 text-[10px]">Seller Account</p>
+        </div>
+      </div>
+      <button onclick="logout()"
+        class="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-white/40 hover:text-red-400 hover:bg-red-500/10 transition-all text-xs">
+        <span class="material-symbols-outlined text-[16px]">logout</span> Sign Out
       </button>
-      <div>
-        <h2 class="text-xl text-white font-headline">Orders</h2>
-        <p class="text-white/30 text-xs" id="order-count">Loading...</p>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <div class="main-content">
+    <header
+      class="sticky top-0 z-30 bg-[#0f0a07]/80 backdrop-blur border-b border-[#2a1a0f] px-4 md:px-8 py-4 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <button class="md:hidden text-white/60 hover:text-white flex-shrink-0" onclick="toggleSidebar()">
+          <span class="material-symbols-outlined">menu</span>
+        </button>
+        <div>
+          <h2 class="text-xl text-white font-headline">Orders</h2>
+          <p class="text-white/30 text-xs" id="order-count">Loading...</p>
+        </div>
+      </div>
+    </header>
+
+    <div class="p-4 md:p-8 fade-in space-y-6">
+      <!-- Filters -->
+      <div class="flex flex-wrap items-center gap-2 md:gap-3">
+        <div class="relative flex-1 min-w-[160px]">
+          <span
+            class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-white/30 text-[18px]">search</span>
+          <input id="search-input" type="text" placeholder="Search by customer or ID..." class="form-input pl-9 w-full"
+            oninput="renderTable()" />
+        </div>
+        <select id="status-filter" class="form-input flex-1 min-w-[110px]" onchange="renderTable()">
+          <option value="">All Statuses</option>
+          <option>Pending</option>
+          <option>Processing</option>
+          <option>Shipped</option>
+          <option>Delivered</option>
+          <option>Cancelled</option>
+        </select>
+        <select id="payment-filter" class="form-input flex-1 min-w-[110px]" onchange="renderTable()">
+          <option value="">All Payments</option>
+          <option>Unpaid</option>
+          <option>Paid</option>
+          <option>Refunded</option>
+        </select>
+      </div>
+
+      <!-- Table -->
+      <div class="card overflow-x-auto">
+        <table style="width:100%;min-width:800px">
+          <thead>
+            <tr>
+              <th>Order</th>
+              <th>Customer</th>
+              <th>Items</th>
+              <th>Total</th>
+              <th>Status</th>
+              <th>Payment</th>
+              <th>Date</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="orders-tbody">
+            <tr>
+              <td colspan="8" class="text-center text-white/30 py-10">Loading...</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
-  </header>
+  </div>
 
-  <div class="p-4 md:p-8 fade-in space-y-6">
-    <!-- Filters -->
-    <div class="flex flex-wrap items-center gap-2 md:gap-3">
-      <div class="relative flex-1 min-w-[160px]">
-        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-white/30 text-[18px]">search</span>
-        <input id="search-input" type="text" placeholder="Search by customer or ID..."
-          class="form-input pl-9 w-full" oninput="renderTable()" />
+  <!-- Order Detail Modal -->
+  <div id="modal" class="modal-overlay hidden" onclick="if(event.target===this)closeModal()">
+    <div
+      class="bg-[#18100a] border border-[#2a1a0f] rounded-2xl p-8 w-full max-w-lg shadow-2xl overflow-y-auto max-h-[90vh]"
+      onclick="event.stopPropagation()">
+      <div class="flex items-center justify-between mb-6">
+        <h3 class="text-2xl font-headline text-white">Update Order</h3>
+        <button onclick="closeModal()" class="text-white/30 hover:text-white/70"><span
+            class="material-symbols-outlined">close</span></button>
       </div>
-      <select id="status-filter" class="form-input flex-1 min-w-[110px]" onchange="renderTable()">
-        <option value="">All Statuses</option>
-        <option>Pending</option><option>Processing</option>
-        <option>Shipped</option><option>Delivered</option><option>Cancelled</option>
-      </select>
-      <select id="payment-filter" class="form-input flex-1 min-w-[110px]" onchange="renderTable()">
-        <option value="">All Payments</option>
-        <option>Unpaid</option><option>Paid</option><option>Refunded</option>
-      </select>
-    </div>
-
-    <!-- Table -->
-    <div class="card overflow-x-auto">
-      <table style="width:100%;min-width:800px">
-        <thead>
-          <tr>
-            <th>Order</th><th>Customer</th><th>Items</th>
-            <th>Total</th><th>Status</th><th>Payment</th><th>Date</th><th>Actions</th>
-          </tr>
-        </thead>
-        <tbody id="orders-tbody">
-          <tr><td colspan="8" class="text-center text-white/30 py-10">Loading...</td></tr>
-        </tbody>
-      </table>
+      <div id="modal-content"></div>
     </div>
   </div>
-</div>
 
-<!-- Order Detail Modal -->
-<div id="modal" class="modal-overlay hidden" onclick="if(event.target===this)closeModal()">
-  <div class="bg-[#18100a] border border-[#2a1a0f] rounded-2xl p-8 w-full max-w-lg shadow-2xl overflow-y-auto max-h-[90vh]" onclick="event.stopPropagation()">
-    <div class="flex items-center justify-between mb-6">
-      <h3 class="text-2xl font-headline text-white">Update Order</h3>
-      <button onclick="closeModal()" class="text-white/30 hover:text-white/70"><span class="material-symbols-outlined">close</span></button>
-    </div>
-    <div id="modal-content"></div>
-  </div>
-</div>
+  <script>
+    async function init() {
+      const session = await checkAuth();
+      if (!session) return;
+      document.getElementById('admin-email').textContent = session.user.email;
+      loadOrders();
+    }
 
-<script>
-  async function init() {
-    const session = await checkAuth();
-    if (!session) return;
-    document.getElementById('admin-email').textContent = session.user.email;
-    loadOrders();
-  }
+    function logout() {
+      handleLogout();
+    }
 
-  function logout() {
-    handleLogout();
-  }
+    function showToast(msg, type = 'success') {
+      const t = document.getElementById('toast');
+      t.className = 'toast ' + type;
+      t.innerHTML = (type === 'success' ? '✓ ' : '✕ ') + msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 3000);
+    }
 
-  function showToast(msg, type = 'success') {
-    const t = document.getElementById('toast');
-    t.className = 'toast ' + type;
-    t.innerHTML = (type === 'success' ? '✓ ' : '✕ ') + msg;
-    t.classList.add('show');
-    setTimeout(() => t.classList.remove('show'), 3000);
-  }
+    function fmt(n) { return '₹' + parseFloat(n).toFixed(2); }
+    function fmtDate(d) { return new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' }); }
+    function statusBadge(s) {
+      const cls = { Pending: 'badge-pending', Processing: 'badge-processing', Shipped: 'badge-shipped', Delivered: 'badge-delivered', Cancelled: 'badge-cancelled' };
+      return `<span class="badge ${cls[s] || ''}">${s}</span>`;
+    }
+    function payBadge(s) {
+      const cls = { Unpaid: 'badge-unpaid', Paid: 'badge-paid', Refunded: 'badge-refunded' };
+      return `<span class="badge ${cls[s] || ''}">${s}</span>`;
+    }
 
-  function fmt(n) { return '₹' + parseFloat(n).toFixed(2); }
-  function fmtDate(d) { return new Date(d).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric', hour:'numeric', minute:'2-digit' }); }
-  function statusBadge(s) {
-    const cls = { Pending:'badge-pending', Processing:'badge-processing', Shipped:'badge-shipped', Delivered:'badge-delivered', Cancelled:'badge-cancelled' };
-    return `<span class="badge ${cls[s] || ''}">${s}</span>`;
-  }
-  function payBadge(s) {
-    const cls = { Unpaid:'badge-unpaid', Paid:'badge-paid', Refunded:'badge-refunded' };
-    return `<span class="badge ${cls[s]||''}">${s}</span>`;
-  }
-
-  async function loadOrders() {
-    try {
-      const { data, error } = await supabase
+    async function loadOrders() {
+      try {
+        const { data, error } = await supabase
           .from('orders')
           .select('*, customers(*), order_items(*, products(*))')
           .order('created_at', { ascending: false });
 
-      if (error) throw error;
-      orders = data;
-      document.getElementById('order-count').textContent = `${orders.length} orders`;
-      renderTable();
-    } catch (err) {
-      console.error("Load orders error:", err);
-      showToast('Failed to load orders', 'error');
-    }
-  }
-
-  function renderTable() {
-    const search = document.getElementById('search-input').value.toLowerCase();
-    const status = document.getElementById('status-filter').value;
-    const payment = document.getElementById('payment-filter').value;
-
-    let filtered = orders.filter(o => {
-      if (search) {
-        const idMatch = o.id.slice(0,8).toLowerCase().includes(search);
-        const nameMatch = (o.customers?.name||'').toLowerCase().includes(search);
-        if (!idMatch && !nameMatch) return false;
+        if (error) throw error;
+        orders = data;
+        document.getElementById('order-count').textContent = `${orders.length} orders`;
+        renderTable();
+      } catch (err) {
+        console.error("Load orders error:", err);
+        showToast('Failed to load orders', 'error');
       }
-      if (status && o.status !== status) return false;
-      if (payment && o.payment_status !== payment) return false;
-      return true;
-    });
-
-    const tbody = document.getElementById('orders-tbody');
-    if (!filtered.length) {
-      tbody.innerHTML = '<tr><td colspan="8" class="text-center text-white/30 py-10">No orders found</td></tr>';
-      return;
     }
 
-    tbody.innerHTML = filtered.map(o => {
-      const itemCount = (o.order_items || []).reduce((s, i) => s + i.quantity, 0);
-      const itemNames = (o.order_items || []).map(i => `${i.products?.name || 'Product'} ${i.size ? `(${i.size})` : ''}`).join(', ');
-      return `
+    function renderTable() {
+      const search = document.getElementById('search-input').value.toLowerCase();
+      const status = document.getElementById('status-filter').value;
+      const payment = document.getElementById('payment-filter').value;
+
+      let filtered = orders.filter(o => {
+        if (search) {
+          const idMatch = o.id.slice(0, 8).toLowerCase().includes(search);
+          const nameMatch = (o.customers?.name || '').toLowerCase().includes(search);
+          if (!idMatch && !nameMatch) return false;
+        }
+        if (status && o.status !== status) return false;
+        if (payment && o.payment_status !== payment) return false;
+        return true;
+      });
+
+      const tbody = document.getElementById('orders-tbody');
+      if (!filtered.length) {
+        tbody.innerHTML = '<tr><td colspan="8" class="text-center text-white/30 py-10">No orders found</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = filtered.map(o => {
+        const itemCount = (o.order_items || []).reduce((s, i) => s + i.quantity, 0);
+        const itemNames = (o.order_items || []).map(i => `${i.products?.name || 'Product'} ${i.size ? `(${i.size})` : ''}`).join(', ');
+        return `
         <tr>
-          <td class="text-orange-400 font-mono text-xs">#${o.id.slice(0,8).toUpperCase()}</td>
+          <td class="text-orange-400 font-mono text-xs">#${o.id.slice(0, 8).toUpperCase()}</td>
           <td>
             <p class="text-white text-sm">${o.customers?.name || '—'}</p>
             <p class="text-white/30 text-xs">${o.customers?.email || ''}</p>
@@ -240,7 +483,7 @@
           </td>
           <td class="text-green-400 font-semibold">
             ${fmt(o.total_amount)}
-            <p class="text-[10px] text-white/30 font-normal">${o.payment_type === 'Partial' ? 'Partial: ' + fmt(o.paid_amount) : 'Full'}</p>
+            <p class="text-[10px] text-white/30 font-normal">${o.payment_type === 'Online' || o.payment_type === 'Partial' ? 'Online' : 'Cash on Delivery'}</p>
           </td>
           <td>${statusBadge(o.status)}</td>
           <td>${payBadge(o.payment_status)}</td>
@@ -251,21 +494,21 @@
             </button>
           </td>
         </tr>`;
-    }).join('');
-  }
+      }).join('');
+    }
 
-  function openModal(id) {
-    currentOrder = orders.find(o => o.id === id);
-    if (!currentOrder) return;
-    const o = currentOrder;
-    const statuses = ['Pending','Processing','Shipped','Delivered','Cancelled'];
-    const payments = ['Unpaid','Paid','Refunded'];
+    function openModal(id) {
+      currentOrder = orders.find(o => o.id === id);
+      if (!currentOrder) return;
+      const o = currentOrder;
+      const statuses = ['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled'];
+      const payments = ['Unpaid', 'Paid', 'Refunded'];
 
-    document.getElementById('modal-content').innerHTML = `
+      document.getElementById('modal-content').innerHTML = `
       <div class="space-y-4 mb-6">
         <div class="bg-white/5 rounded-xl p-4">
           <p class="text-white/40 text-xs mb-1">Order ID</p>
-          <p class="text-orange-400 font-mono">#${o.id.slice(0,8).toUpperCase()}</p>
+          <p class="text-orange-400 font-mono">#${o.id.slice(0, 8).toUpperCase()}</p>
         </div>
         <div class="bg-white/5 rounded-xl p-4">
           <p class="text-white/40 text-xs mb-1">Customer</p>
@@ -275,18 +518,13 @@
         <div class="bg-white/5 rounded-xl p-4">
           <p class="text-white/40 text-xs mb-2">Payment Details</p>
           <div class="flex justify-between text-sm mb-1">
-            <span class="text-white/60">Payment Plan</span>
-            <span class="text-white font-medium">${o.payment_type || 'Full'}</span>
+            <span class="text-white/60">Payment Method</span>
+            <span class="text-white font-medium">${o.payment_type === 'Online' || o.payment_type === 'Partial' ? 'Online' : 'Cash on Delivery'}</span>
           </div>
-          <div class="flex justify-between text-sm">
-            <span class="text-white/60">Amount Paid</span>
-            <span class="text-green-400 font-medium">${fmt(o.paid_amount || 0)}</span>
-          </div>
-          <p class="text-[10px] text-white/30 mt-2 italic">Remaining: ${fmt(parseFloat(o.total_amount) - parseFloat(o.paid_amount || 0))}</p>
         </div>
         <div class="bg-white/5 rounded-xl p-4">
           <p class="text-white/40 text-xs mb-2">Items</p>
-          ${(o.order_items||[]).map(i => `
+          ${(o.order_items || []).map(i => `
             <div class="flex justify-between text-sm mb-1">
               <span class="text-white">${i.products?.name || 'Product'} ${i.size ? `<span class="text-orange-400 text-[10px] font-bold">(${i.size})</span>` : ''} × ${i.quantity}</span>
               <span class="text-green-400">${fmt(i.unit_price * i.quantity)}</span>
@@ -301,13 +539,13 @@
         <div>
           <label class="block text-white/50 text-xs uppercase tracking-widest mb-2">Order Status</label>
           <select id="new-status" class="form-input w-full">
-            ${statuses.map(s => `<option ${s===o.status?'selected':''}>${s}</option>`).join('')}
+            ${statuses.map(s => `<option ${s === o.status ? 'selected' : ''}>${s}</option>`).join('')}
           </select>
         </div>
         <div>
           <label class="block text-white/50 text-xs uppercase tracking-widest mb-2">Payment Status</label>
           <select id="new-payment" class="form-input w-full">
-            ${payments.map(p => `<option ${p===o.payment_status?'selected':''}>${p}</option>`).join('')}
+            ${payments.map(p => `<option ${p === o.payment_status ? 'selected' : ''}>${p}</option>`).join('')}
           </select>
         </div>
         <div class="flex gap-3 pt-2">
@@ -316,39 +554,40 @@
         </div>
       </div>`;
 
-    document.getElementById('modal').classList.remove('hidden');
-  }
+      document.getElementById('modal').classList.remove('hidden');
+    }
 
-  function closeModal() { document.getElementById('modal').classList.add('hidden'); currentOrder = null; }
+    function closeModal() { document.getElementById('modal').classList.add('hidden'); currentOrder = null; }
 
-  async function updateOrder() {
-    if (!currentOrder) return;
-    const status = document.getElementById('new-status').value;
-    const payment_status = document.getElementById('new-payment').value;
+    async function updateOrder() {
+      if (!currentOrder) return;
+      const status = document.getElementById('new-status').value;
+      const payment_status = document.getElementById('new-payment').value;
 
-    try {
-      const { error } = await supabase
+      try {
+        const { error } = await supabase
           .from('orders')
           .update({ status, payment_status })
           .eq('id', currentOrder.id);
 
-      if (error) throw error;
-      
-      showToast('Order updated');
-      closeModal();
-      loadOrders();
-    } catch (err) {
-      console.error("Update error:", err);
-      showToast('Failed to update order', 'error');
+        if (error) throw error;
+
+        showToast('Order updated');
+        closeModal();
+        loadOrders();
+      } catch (err) {
+        console.error("Update error:", err);
+        showToast('Failed to update order', 'error');
+      }
     }
-  }
 
-  init();
+    init();
 
-  function toggleSidebar() {
-    document.querySelector('.sidebar').classList.toggle('open');
-    document.getElementById('sidebar-overlay').classList.toggle('show');
-  }
-</script>
+    function toggleSidebar() {
+      document.querySelector('.sidebar').classList.toggle('open');
+      document.getElementById('sidebar-overlay').classList.toggle('show');
+    }
+  </script>
 </body>
+
 </html>
