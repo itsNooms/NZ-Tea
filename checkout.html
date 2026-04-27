@@ -122,22 +122,18 @@
             <textarea id="f-address" rows="2" required class="form-input resize-none" placeholder="Street, City, State, PIN"></textarea>
           </div>
           <div class="bg-surface-container-low p-4 rounded-xl border border-outline-variant/30">
-            <label class="block text-xs uppercase tracking-widest text-on-surface-variant mb-3 font-semibold">Payment Plan *</label>
+            <label class="block text-xs uppercase tracking-widest text-on-surface-variant mb-3 font-semibold">Payment Method *</label>
             <div class="grid grid-cols-2 gap-3">
               <label class="relative flex flex-col items-center gap-2 p-3 border rounded-xl cursor-pointer transition-all hover:bg-white bg-white border-primary" id="plan-full-label">
-                <input type="radio" name="payment-plan" value="Full" checked class="hidden" onchange="togglePaymentPlan('Full')">
-                <span class="text-sm font-semibold text-primary">Full Pay</span>
-                <span class="text-[10px] text-on-surface-variant text-center leading-tight">Pay total amount on delivery</span>
+                <input type="radio" name="payment-plan" value="Cash" checked class="hidden" onchange="togglePaymentPlan('Cash')">
+                <span class="material-symbols-outlined text-primary text-[24px]">payments</span>
+                <span class="text-sm font-semibold text-primary text-center">Cash on Delivery</span>
               </label>
               <label class="relative flex flex-col items-center gap-2 p-3 border rounded-xl cursor-pointer transition-all hover:bg-white bg-white border-outline-variant" id="plan-partial-label">
-                <input type="radio" name="payment-plan" value="Partial" class="hidden" onchange="togglePaymentPlan('Partial')">
-                <span class="text-sm font-semibold">Partial Pay</span>
-                <span class="text-[10px] text-on-surface-variant text-center leading-tight">Pay small amount now & rest later</span>
+                <input type="radio" name="payment-plan" value="Online" class="hidden" onchange="togglePaymentPlan('Online')">
+                <span class="material-symbols-outlined text-[24px]">account_balance_wallet</span>
+                <span class="text-sm font-semibold text-center">Online Payment</span>
               </label>
-            </div>
-            <div id="partial-input-wrap" class="mt-4 hidden animate-fade-in">
-              <label class="block text-[11px] font-bold text-on-surface-variant mb-2">How much will you pay now? (₹)</label>
-              <input id="f-paid-amount" type="number" step="0.01" class="form-input" placeholder="0.00" />
             </div>
           </div>
           <div class="flex justify-between pt-4">
@@ -166,11 +162,7 @@
             <p class="text-xs uppercase tracking-widest text-on-surface-variant mb-3 font-semibold">Payment Summary</p>
             <div class="flex justify-between text-sm mb-1">
               <span>Payment Type:</span>
-              <span id="confirm-pay-type" class="font-semibold text-primary">Full</span>
-            </div>
-            <div id="confirm-partial-row" class="hidden flex justify-between text-sm">
-              <span>Paying Now:</span>
-              <span id="confirm-paid-amount" class="font-semibold text-green-600">₹0.00</span>
+              <span id="confirm-pay-type" class="font-semibold text-primary">Cash on Delivery</span>
             </div>
           </div>
           <div class="bg-surface-container rounded-xl p-5">
@@ -179,7 +171,7 @@
           </div>
           <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-4 flex items-start gap-3">
             <span class="material-symbols-outlined text-yellow-600 text-[20px] mt-0.5">info</span>
-            <p class="text-sm text-yellow-800">Payment on delivery. Our team will contact you to confirm the order.</p>
+            <p class="text-sm text-yellow-800" id="payment-notice">Payment on delivery. Our team will contact you to confirm the order.</p>
           </div>
         </div>
         <div class="flex justify-between pt-4">
@@ -232,7 +224,7 @@
             <span class="material-symbols-outlined text-green-600 text-[16px]">verified_user</span> SSL Secured Checkout
           </div>
           <div class="flex items-center gap-2 text-xs text-on-surface-variant">
-            <span class="material-symbols-outlined text-green-600 text-[16px]">payments</span> Cash on Delivery
+            <span class="material-symbols-outlined text-green-600 text-[16px]">payments</span> Cash on Delivery / Online
           </div>
           <div class="flex items-center gap-2 text-xs text-on-surface-variant">
             <span class="material-symbols-outlined text-green-600 text-[16px]">local_shipping</span> Free Delivery
@@ -246,25 +238,29 @@
 <script>
   let cart = JSON.parse(localStorage.getItem('nztea_cart') || '[]');
   let customerDetails = {};
-  let paymentPlan = 'Full';
+  let paymentPlan = 'Cash';
   let currentStep = 1;
 
   function togglePaymentPlan(plan) {
     paymentPlan = plan;
     const full = document.getElementById('plan-full-label');
     const part = document.getElementById('plan-partial-label');
-    const input = document.getElementById('partial-input-wrap');
+    const notice = document.getElementById('payment-notice');
 
-    if (plan === 'Full') {
+    if (plan === 'Cash') {
       full.classList.add('border-primary'); part.classList.remove('border-primary');
       full.querySelector('.font-semibold').classList.add('text-primary');
+      full.querySelector('.material-symbols-outlined').classList.add('text-primary');
       part.querySelector('.font-semibold').classList.remove('text-primary');
-      input.classList.add('hidden');
+      part.querySelector('.material-symbols-outlined').classList.remove('text-primary');
+      notice.textContent = "Payment on delivery. Our team will contact you to confirm the order.";
     } else {
       part.classList.add('border-primary'); full.classList.remove('border-primary');
       part.querySelector('.font-semibold').classList.add('text-primary');
+      part.querySelector('.material-symbols-outlined').classList.add('text-primary');
       full.querySelector('.font-semibold').classList.remove('text-primary');
-      input.classList.remove('hidden');
+      full.querySelector('.material-symbols-outlined').classList.remove('text-primary');
+      notice.textContent = "Pay online during or after delivery. Our team will share the payment link/QR.";
     }
   }
 
@@ -368,14 +364,7 @@
     document.getElementById('confirm-phone').textContent = customerDetails.phone;
     document.getElementById('confirm-address').textContent = customerDetails.address;
 
-    document.getElementById('confirm-pay-type').textContent = paymentPlan + ' Payment';
-    if (paymentPlan === 'Partial') {
-      const amt = document.getElementById('f-paid-amount').value || 0;
-      document.getElementById('confirm-paid-amount').textContent = fmt(amt);
-      document.getElementById('confirm-partial-row').classList.remove('hidden');
-    } else {
-      document.getElementById('confirm-partial-row').classList.add('hidden');
-    }
+    document.getElementById('confirm-pay-type').textContent = paymentPlan === 'Cash' ? 'Cash on Delivery' : 'Online Payment';
 
     const subtotal = cart.reduce((s, i) => s + (i.price * i.quantity), 0);
     const shipping = subtotal >= 500 ? 0 : 50;
@@ -400,7 +389,7 @@
     const subtotal = cart.reduce((s, i) => s + (i.price * i.quantity), 0);
     const shipping = 0;
     const total = subtotal + shipping;
-    const paidAmt = paymentPlan === 'Partial' ? document.getElementById('f-paid-amount').value : 0;
+    const paidAmt = 0;
 
     try {
       // 1. Create/Get Customer (Upsert by email)
