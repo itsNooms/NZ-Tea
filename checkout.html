@@ -241,6 +241,38 @@
   let paymentPlan = 'Cash';
   let currentStep = 1;
 
+  // ── Auto-fill saved customer details from localStorage ────────────────────
+  const SAVED_CUSTOMER_KEY = 'nztea_customer_details';
+
+  function loadSavedCustomerDetails() {
+    const saved = JSON.parse(localStorage.getItem(SAVED_CUSTOMER_KEY) || 'null');
+    if (!saved) return;
+    const nameEl = document.getElementById('f-name');
+    const phoneEl = document.getElementById('f-phone');
+    const emailEl = document.getElementById('f-email');
+    const addrEl = document.getElementById('f-address');
+    if (nameEl && saved.name) nameEl.value = saved.name;
+    if (phoneEl && saved.phone) phoneEl.value = saved.phone;
+    if (emailEl && saved.email) emailEl.value = saved.email;
+    if (addrEl && saved.address) addrEl.value = saved.address;
+    // Show a subtle indicator that details were pre-filled
+    if (saved.name) showSavedBanner();
+  }
+
+  function saveCustomerDetails(details) {
+    localStorage.setItem(SAVED_CUSTOMER_KEY, JSON.stringify(details));
+  }
+
+  function showSavedBanner() {
+    const form = document.getElementById('details-form');
+    if (!form || document.getElementById('saved-details-banner')) return;
+    const banner = document.createElement('div');
+    banner.id = 'saved-details-banner';
+    banner.style.cssText = 'display:flex;align-items:center;gap:8px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:10px 14px;margin-bottom:16px;font-size:12px;color:#15803d;font-family:Manrope,sans-serif;';
+    banner.innerHTML = '<span class="material-symbols-outlined" style="font-size:16px;">check_circle</span> Your delivery details were saved from your last order. Feel free to update them.';
+    form.insertBefore(banner, form.firstChild);
+  }
+
   function togglePaymentPlan(plan) {
     paymentPlan = plan;
     const full = document.getElementById('plan-full-label');
@@ -353,10 +385,10 @@
   document.getElementById('details-form').addEventListener('submit', (e) => {
     e.preventDefault();
     customerDetails = {
-      name: document.getElementById('f-name').value,
-      email: document.getElementById('f-email').value,
-      phone: document.getElementById('f-phone').value,
-      address: document.getElementById('f-address').value,
+      name: document.getElementById('f-name').value.trim(),
+      email: document.getElementById('f-email').value.trim(),
+      phone: document.getElementById('f-phone').value.trim(),
+      address: document.getElementById('f-address').value.trim(),
     };
 
     document.getElementById('confirm-name').textContent = customerDetails.name;
@@ -437,6 +469,22 @@
 
       if (itemsErr) throw itemsErr;
 
+      // ── Save customer details for next time ─────────────────────────────
+      saveCustomerDetails(customerDetails);
+
+      // ── Send confirmation email (non-blocking) ───────────────────────────
+      const supabaseUrl = 'https://nprnngtixtdazegpvinq.supabase.co';
+      const emailPayload = {
+        customer: customerDetails,
+        order: { id: order.id, total_amount: total, payment_type: paymentPlan },
+        items: cart.map(i => ({ name: i.name, size: i.size, quantity: i.quantity, unit_price: i.price }))
+      };
+      fetch(`${supabaseUrl}/functions/v1/send-order-confirmation`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(emailPayload)
+      }).then(r => r.json()).then(r => console.log('Email result:', r)).catch(e => console.warn('Email send failed (non-critical):', e));
+
       localStorage.removeItem('nztea_cart');
       document.getElementById('success-order-id').textContent = `Order ID: #${order.id.slice(0,8).toUpperCase()}`;
       goStep(4);
@@ -449,6 +497,7 @@
   }
 
   renderCart();
+  loadSavedCustomerDetails();
 </script>
 </body>
 </html>
